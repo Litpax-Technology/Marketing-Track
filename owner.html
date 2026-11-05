@@ -3,58 +3,18 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Owner Dashboard — Litpax Marketing Hub</title>
+<title>Owner — Litpax Marketing Hub</title>
 <link rel="stylesheet" href="style.css"/>
-<style>
-  .sidebar { background: #1a237e; }
-  .nav-item.active { border-left-color: #7986cb; }
-  .stat-value { color: #1a237e; }
-  .btn-primary { background: #1a237e; }
-  .btn-primary:hover { background: #283593; }
-  .filter-btn.active { background: #1a237e; color: white; border-color: #1a237e; }
-  .toast { background: #1a237e; }
-  .form-group input:focus,
-  .form-group select:focus,
-  .form-group textarea:focus { border-color: #1a237e; }
-  .task-for-toggle {
-    display: flex; gap: 0; border: 1.5px solid #e8e8e8;
-    border-radius: 8px; overflow: hidden;
-  }
-  .task-for-btn {
-    flex: 1; padding: 10px 12px; border: none; background: white;
-    font-size: 13px; font-weight: 500; cursor: pointer;
-    font-family: 'Inter', sans-serif; transition: all 0.2s; color: #555;
-  }
-  .task-for-btn.active { background: #1a237e; color: white; font-weight: 600; }
-  .task-for-btn:first-child { border-right: 1.5px solid #e8e8e8; }
-  .agency-field { display: none; }
-  .agency-field.show { display: flex; }
-  .tag-internal { background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-  .tag-agency   { background: #f3e5f5; color: #6a1b9a; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-  .req-card {
-    background: white; border-radius: 12px; padding: 20px;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.06);
-    border-left: 4px solid #a5d6a7; margin-bottom: 12px;
-  }
-  .req-card.status-pending  { border-left-color: #e65100; }
-  .req-card.status-done     { border-left-color: #2e7d32; }
-  .req-card.status-rejected { border-left-color: #c62828; }
-  .req-card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
-  .req-card-head h3 { font-size: 14px; font-weight: 700; color: #1a1a2e; }
-  .req-meta { display: flex; gap: 16px; margin: 8px 0 4px; flex-wrap: wrap; }
-  .req-meta-item { font-size: 11px; color: #aaa; }
-  .req-meta-item strong { color: #555; }
-</style>
 </head>
-<body>
+<body class="theme-owner">
 
 <div class="sidebar">
   <div class="sidebar-brand"><h2>⚡ Litpax</h2><p>Marketing Hub</p></div>
   <nav class="nav">
-    <div class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard"><span class="icon">📊</span> Dashboard</div>
-    <div class="nav-item" onclick="showSection('create')" id="nav-create"><span class="icon">➕</span> New Task</div>
+    <div class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard"><span class="icon">📊</span> Dashboard <span class="nav-count alert" id="c-review"></span></div>
+    <div class="nav-item" onclick="showSection('create');prepCreate()" id="nav-create"><span class="icon">➕</span> New Task</div>
     <div class="nav-item" onclick="showSection('tasks')" id="nav-tasks"><span class="icon">📋</span> All Tasks</div>
-    <div class="nav-item" onclick="showSection('agentrequests');loadAgencyRequests()" id="nav-agentrequests"><span class="icon">📬</span> Agency Requests</div>
+    <div class="nav-item" onclick="showSection('requests');loadAgencyRequests()" id="nav-requests"><span class="icon">📬</span> Agency Requests</div>
     <div class="nav-item" onclick="showSection('log');loadLog()" id="nav-log"><span class="icon">📜</span> Activity Log</div>
   </nav>
   <div class="sidebar-footer">
@@ -71,24 +31,32 @@
   <!-- DASHBOARD -->
   <div class="section active" id="section-dashboard">
     <div class="page-header">
-      <div><h1>Dashboard</h1><p>Marketing campaigns ka full overview</p></div>
-      <button class="btn-primary" onclick="loadDashboard()">🔄 Refresh</button>
+      <div><h1>Dashboard</h1><p>Marketing ka full overview</p></div>
+      <button class="btn-primary" onclick="refreshAll()">🔄 Refresh</button>
     </div>
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-label">Total Tasks</div><div class="stat-value" id="stat-total">—</div><div class="stat-sub">All campaigns</div></div>
-      <div class="stat-card amber"><div class="stat-label">In Progress</div><div class="stat-value" id="stat-inprogress">—</div><div class="stat-sub">Active work</div></div>
-      <div class="stat-card"><div class="stat-label">Pending Review</div><div class="stat-value" id="stat-review">—</div><div class="stat-sub">Awaiting approval</div></div>
-      <div class="stat-card red"><div class="stat-label">Overdue</div><div class="stat-value" id="stat-overdue">—</div><div class="stat-sub">Past due date</div></div>
+      <div class="stat-card"><div class="stat-label">Active Tasks</div><div class="stat-value" id="stat-active">—</div><div class="stat-sub">Abhi chal rahe</div></div>
+      <div class="stat-card"><div class="stat-label">Pending Review</div><div class="stat-value" id="stat-review">—</div><div class="stat-sub">Aapka approval</div></div>
+      <div class="stat-card amber"><div class="stat-label">Rework</div><div class="stat-value" id="stat-rejected">—</div><div class="stat-sub">Reject hoke wapas gaye</div></div>
+      <div class="stat-card red"><div class="stat-label">Overdue</div><div class="stat-value" id="stat-overdue">—</div><div class="stat-sub">Due date nikal gayi</div></div>
     </div>
-    <div class="stats-grid col3">
-      <div class="stat-card green"><div class="stat-label">Approved</div><div class="stat-value" id="stat-approved">—</div><div class="stat-sub">Completed</div></div>
-      <div class="stat-card"><div class="stat-label">Internal Tasks</div><div class="stat-value" id="stat-internal">—</div><div class="stat-sub">Employee only</div></div>
-      <div class="stat-card"><div class="stat-label">Agency Tasks</div><div class="stat-value" id="stat-agency">—</div><div class="stat-sub">Via agency</div></div>
+    <div class="stats-grid col5">
+      <div class="stat-card green"><div class="stat-label">Completed</div><div class="stat-value" id="stat-approved">—</div><div class="stat-sub">Approved</div></div>
+      <div class="stat-card"><div class="stat-label">Internal</div><div class="stat-value" id="stat-internal">—</div><div class="stat-sub">Employee only</div></div>
+      <div class="stat-card"><div class="stat-label">Agency</div><div class="stat-value" id="stat-agency">—</div><div class="stat-sub">Via agency</div></div>
+      <div class="stat-card"><div class="stat-label">Avg time</div><div class="stat-value" id="stat-avg">—</div><div class="stat-sub">Din, create → complete</div></div>
+      <div class="stat-card"><div class="stat-label">Agency on-time</div><div class="stat-value" id="stat-ontime">—</div><div class="stat-sub">Due date tak complete</div></div>
+    </div>
+    <div id="alerts"></div>
+    <div class="table-card" style="margin-bottom:20px">
+      <div class="table-header"><h3>🔍 Review Pending</h3></div>
+      <table><thead><tr><th>Task</th><th>Type</th><th>For</th><th>Agency</th><th>Bheja</th><th>Due</th><th>Action</th></tr></thead>
+      <tbody id="review-tbody"><tr><td colspan="7" class="empty-state"><p>Loading...</p></td></tr></tbody></table>
     </div>
     <div class="table-card">
-      <div class="table-header"><h3>🔍 Review Pending Tasks</h3></div>
-      <table><thead><tr><th>Task</th><th>Type</th><th>For</th><th>Priority</th><th>Agency</th><th>Due</th><th>Action</th></tr></thead>
-      <tbody id="review-tbody"><tr><td colspan="7" class="empty-state"><p>Loading...</p></td></tr></tbody></table>
+      <div class="table-header"><h3>📈 Type-wise</h3></div>
+      <table><thead><tr><th>Type</th><th>Total</th><th>Completed</th><th>%</th></tr></thead>
+      <tbody id="type-tbody"></tbody></table>
     </div>
   </div>
 
@@ -101,19 +69,17 @@
         <div class="form-group full">
           <label>Task Kiske Liye Hai? *</label>
           <div class="task-for-toggle">
-            <button class="task-for-btn active" id="btn-internal" onclick="setTaskFor('Employee Only')">👤 Employee Only (Internal)</button>
-            <button class="task-for-btn" id="btn-agency" onclick="setTaskFor('Employee → Agency')">🏢 Employee → Agency</button>
+            <button class="task-for-btn active" id="btn-internal" onclick="setTaskFor(TASK_FOR_INTERNAL)">👤 Employee Only (Internal)</button>
+            <button class="task-for-btn" id="btn-agency" onclick="setTaskFor(TASK_FOR_AGENCY)">🏢 Employee → Agency</button>
           </div>
         </div>
-        <input type="hidden" id="f-taskfor" value="Employee Only"/>
-        <div class="form-group full"><label>Task Title *</label><input type="text" id="f-title" placeholder="e.g. Battery Brochure Update"/></div>
+        <div class="form-group full"><label>Task Title *</label><input type="text" id="f-title" maxlength="200" placeholder="e.g. Battery Brochure Update"/></div>
         <div class="form-group">
           <label>Type *</label>
           <select id="f-type">
             <option value="">Select type</option>
-            <option>Social Media</option><option>Branding</option>
-            <option>Advertisement</option><option>Content Writing</option>
-            <option>Video</option><option>Print</option><option>Other</option>
+            <option>Social Media</option><option>Branding</option><option>Advertisement</option>
+            <option>Content Writing</option><option>Video</option><option>Print</option><option>Other</option>
           </select>
         </div>
         <div class="form-group">
@@ -123,8 +89,8 @@
         <div class="form-group full"><label>Description</label><textarea id="f-desc" placeholder="Task detail..."></textarea></div>
         <div class="form-group"><label>Due Date</label><input type="date" id="f-due"/></div>
         <div class="form-group agency-field" id="agency-field-wrap">
-          <label>Agency Person (Optional)</label>
-          <input type="text" id="f-agency" placeholder="Agency ka naam"/>
+          <label>Agency (optional — employee bhi chun sakta hai)</label>
+          <select id="f-agency"></select>
         </div>
       </div>
       <br/>
@@ -135,29 +101,33 @@
   <!-- ALL TASKS -->
   <div class="section" id="section-tasks">
     <div class="page-header">
-      <div><h1>All Tasks</h1><p>Saare tasks — internal aur agency dono</p></div>
+      <div><h1>All Tasks</h1><p>Internal aur agency — bucket-wise</p></div>
       <button class="btn-primary" onclick="loadTasks()">🔄 Refresh</button>
     </div>
     <div class="table-card">
       <div class="table-header">
-        <h3>Tasks</h3>
         <div class="filter-bar">
-          <button class="filter-btn active" onclick="filterTasks('all',this)">All</button>
-          <button class="filter-btn" onclick="filterTasks('internal',this)">Internal</button>
-          <button class="filter-btn" onclick="filterTasks('agency',this)">Agency</button>
-          <button class="filter-btn" onclick="filterTasks('Review',this)">Review</button>
-          <button class="filter-btn" onclick="filterTasks('Approved',this)">Approved</button>
+          <button class="filter-btn active" onclick="setActiveBtn(this);tFilter.bucket='todo';renderTasks()">To-Do <span id="tc-todo"></span></button>
+          <button class="filter-btn" onclick="setActiveBtn(this);tFilter.bucket='agency';renderTasks()">Agency ke paas <span id="tc-agency"></span></button>
+          <button class="filter-btn" onclick="setActiveBtn(this);tFilter.bucket='review';renderTasks()">Review <span id="tc-review"></span></button>
+          <button class="filter-btn" onclick="setActiveBtn(this);tFilter.bucket='done';renderTasks()">Completed</button>
+          <button class="filter-btn" onclick="setActiveBtn(this);tFilter.bucket='all';renderTasks()">All</button>
+        </div>
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="setActiveBtn(this);tFilter.forType='all';renderTasks()">Sab</button>
+          <button class="filter-btn" onclick="setActiveBtn(this);tFilter.forType='internal';renderTasks()">👤 Internal</button>
+          <button class="filter-btn" onclick="setActiveBtn(this);tFilter.forType='agency';renderTasks()">🏢 Agency</button>
         </div>
       </div>
-      <table><thead><tr><th>Task</th><th>Type</th><th>For</th><th>Priority</th><th>Status</th><th>Agency</th><th>Due</th><th>Action</th></tr></thead>
-      <tbody id="tasks-tbody"><tr><td colspan="8" class="empty-state"><p>Loading...</p></td></tr></tbody></table>
+      <table><thead><tr><th class="td-check"></th><th>Task</th><th>Type</th><th>For</th><th>Priority</th><th>Status</th><th>Agency</th><th>Due</th><th>Action</th></tr></thead>
+      <tbody id="tasks-tbody"><tr><td colspan="9" class="empty-state"><p>Loading...</p></td></tr></tbody></table>
     </div>
   </div>
 
   <!-- AGENCY REQUESTS — READONLY -->
-  <div class="section" id="section-agentrequests">
+  <div class="section" id="section-requests">
     <div class="page-header">
-      <div><h1>Agency Requests</h1><p>Marketing agency ne employee se kya manga</p></div>
+      <div><h1>Agency Requests</h1><p>Agency ne employee se kya manga</p></div>
       <button class="btn-primary" onclick="loadAgencyRequests()">🔄 Refresh</button>
     </div>
     <div class="stats-grid col3">
@@ -165,7 +135,7 @@
       <div class="stat-card green"><div class="stat-label">Done</div><div class="stat-value" id="ar-done">—</div><div class="stat-sub">Complete</div></div>
       <div class="stat-card red"><div class="stat-label">Rejected</div><div class="stat-value" id="ar-rejected">—</div><div class="stat-sub">Rejected</div></div>
     </div>
-    <div id="owner-requests-grid"></div>
+    <div id="requests-grid"></div>
   </div>
 
   <!-- ACTIVITY LOG -->
@@ -182,7 +152,7 @@
 
 </div>
 
-<!-- MODAL -->
+<!-- TASK MODAL -->
 <div class="modal-overlay" id="taskModal">
   <div class="modal">
     <div class="modal-head"><h3 id="modal-title">Task Detail</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
@@ -192,222 +162,8 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="script.js"></script>
-<script>
-  let allTasks = [];
-  let user = null;
-
-  window.onload = () => {
-    user = { name: 'Owner', role: 'owner' };
-    initUserChip(user);
-    loadDashboard();
-    loadTasks();
-  };
-
-  function setTaskFor(val) {
-    document.getElementById('f-taskfor').value = val;
-    document.getElementById('btn-internal').classList.toggle('active', val === 'Employee Only');
-    document.getElementById('btn-agency').classList.toggle('active', val === 'Employee → Agency');
-    document.getElementById('agency-field-wrap').classList.toggle('show', val === 'Employee → Agency');
-  }
-
-  async function loadDashboard() {
-    try {
-      const data = await api({ action: 'getDashboard' });
-      if (data.success) {
-        const s = data.stats;
-        document.getElementById('stat-total').textContent      = s.total;
-        document.getElementById('stat-inprogress').textContent = s.inProgress;
-        document.getElementById('stat-review').textContent     = s.review;
-        document.getElementById('stat-overdue').textContent    = s.overdue;
-        document.getElementById('stat-approved').textContent   = s.approved;
-        document.getElementById('stat-internal').textContent   = s.internalTasks || 0;
-        document.getElementById('stat-agency').textContent     = s.agencyTasks || 0;
-      }
-      const td = await api({ action: 'getTasks', role: 'owner', userName: user.name });
-      if (td.success) {
-        const review = td.tasks.filter(t => t.Status === 'Review');
-        const tbody = document.getElementById('review-tbody');
-        tbody.innerHTML = !review.length
-          ? '<tr><td colspan="7" class="empty-state"><p>Koi review pending nahi ✅</p></td></tr>'
-          : review.map(t => `<tr>
-              <td><strong>${t.Title}</strong></td>
-              <td>${t.Type||'—'}</td>
-              <td>${taskForBadge(t.Task_For)}</td>
-              <td>${priorityHtml(t.Priority)}</td>
-              <td>${t.Agency_Person||'—'}</td>
-              <td>${formatDate(t.Due_Date)}</td>
-              <td>
-                <button class="action-btn btn-view" onclick="viewTask('${t.Task_ID}')">View</button>
-                <button class="action-btn btn-approve" onclick="quickUpdate('${t.Task_ID}','Approved')">✓</button>
-                <button class="action-btn btn-reject"  onclick="quickUpdate('${t.Task_ID}','Rejected')">✗</button>
-              </td>
-            </tr>`).join('');
-      }
-    } catch(e) { showToast('Error loading dashboard'); }
-  }
-
-  async function loadTasks() {
-    try {
-      const data = await api({ action: 'getTasks', role: 'owner', userName: user.name });
-      if (data.success) { allTasks = data.tasks; renderTasks(allTasks); }
-    } catch(e) { showToast('Error loading tasks'); }
-  }
-
-  function taskForBadge(val) {
-    if (!val || val === 'Employee Only') return '<span class="tag-internal">👤 Internal</span>';
-    return '<span class="tag-agency">🏢 Agency</span>';
-  }
-
-  function renderTasks(tasks) {
-    const tbody = document.getElementById('tasks-tbody');
-    tbody.innerHTML = !tasks.length
-      ? '<tr><td colspan="8" class="empty-state"><p>Koi task nahi</p></td></tr>'
-      : tasks.map(t => `<tr>
-          <td><strong>${t.Title}</strong><br><small style="color:#aaa">${t.Task_ID}</small></td>
-          <td>${t.Type||'—'}</td>
-          <td>${taskForBadge(t.Task_For)}</td>
-          <td>${priorityHtml(t.Priority)}</td>
-          <td>${badgeHtml(t.Status)}</td>
-          <td>${t.Agency_Person||'—'}</td>
-          <td style="color:${isDue(t.Due_Date)?'#c62828':'#333'}">${formatDate(t.Due_Date)}</td>
-          <td>
-            <button class="action-btn btn-view" onclick="viewTask('${t.Task_ID}')">View</button>
-            ${t.Status==='Review'?`
-              <button class="action-btn btn-approve" onclick="quickUpdate('${t.Task_ID}','Approved')">✓</button>
-              <button class="action-btn btn-reject"  onclick="quickUpdate('${t.Task_ID}','Rejected')">✗</button>`:''}
-          </td>
-        </tr>`).join('');
-  }
-
-  function filterTasks(filter, btn) {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    if (filter === 'all')      return renderTasks(allTasks);
-    if (filter === 'internal') return renderTasks(allTasks.filter(t => !t.Task_For || t.Task_For === 'Employee Only'));
-    if (filter === 'agency')   return renderTasks(allTasks.filter(t => t.Task_For === 'Employee → Agency'));
-    renderTasks(allTasks.filter(t => t.Status === filter));
-  }
-
-  async function createTask() {
-    const title   = document.getElementById('f-title').value.trim();
-    const type    = document.getElementById('f-type').value;
-    const priority= document.getElementById('f-priority').value;
-    const desc    = document.getElementById('f-desc').value.trim();
-    const due     = document.getElementById('f-due').value;
-    const agency  = document.getElementById('f-agency').value.trim();
-    const taskFor = document.getElementById('f-taskfor').value;
-    if (!title || !type || !priority) { showToast('Title, Type aur Priority required!'); return; }
-    const btn = document.getElementById('createBtn');
-    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Creating...';
-    try {
-      const data = await api({ action:'createTask', title, type, priority, description:desc, dueDate:due, createdBy:user.name, assignedTo:'Employee', agencyPerson:agency, taskFor });
-      if (data.success) {
-        showToast('✅ Task created!');
-        ['f-title','f-type','f-priority','f-desc','f-due','f-agency'].forEach(id => document.getElementById(id).value = '');
-        setTaskFor('Employee Only');
-        loadTasks(); loadDashboard();
-      }
-    } catch(e) { showToast('Error'); }
-    btn.disabled = false; btn.innerHTML = 'Create Task';
-  }
-
-  async function quickUpdate(taskId, status) {
-    const remarks = status === 'Rejected' ? prompt('Rejection reason:') || '' : 'Owner ne approve kiya';
-    try {
-      await api({ action:'updateStatus', taskId, newStatus:status, userName:user.name, userRole:'owner', remarks });
-      showToast(`Task ${status}!`); loadDashboard(); loadTasks();
-    } catch(e) { showToast('Error'); }
-  }
-
-  async function viewTask(taskId) {
-    const task = allTasks.find(t => t.Task_ID === taskId);
-    if (!task) return;
-    document.getElementById('modal-title').textContent = task.Title;
-    let dels = [];
-    try { const d = await api({ action:'getDeliverables', taskId }); if(d.success) dels = d.deliverables; } catch(e) {}
-    document.getElementById('modal-body').innerHTML = `
-      <div class="detail-row">
-        <div class="detail-item"><label>Status</label><p>${badgeHtml(task.Status)}</p></div>
-        <div class="detail-item"><label>Task For</label><p>${taskForBadge(task.Task_For)}</p></div>
-        <div class="detail-item"><label>Priority</label><p>${priorityHtml(task.Priority)}</p></div>
-      </div>
-      <div class="detail-row">
-        <div class="detail-item"><label>Type</label><p>${task.Type||'—'}</p></div>
-        <div class="detail-item"><label>Agency</label><p>${task.Agency_Person||'—'}</p></div>
-        <div class="detail-item"><label>Due Date</label><p>${formatDate(task.Due_Date)}</p></div>
-      </div>
-      <div class="detail-item" style="margin-bottom:12px"><label>Description</label><p style="font-size:13px;margin-top:4px">${task.Description||'—'}</p></div>
-      <div class="deliverables-list">
-        <h4>📁 Deliverables (${dels.length})</h4>
-        ${dels.length ? dels.map(d=>`<div class="del-item"><a href="${d.File_Link}" target="_blank" style="color:#1a237e">🔗 ${d.Description||'File'}</a><div class="del-meta">${d.Uploaded_By} · ${formatDate(d.Upload_Date)} · ${d.Status}</div></div>`).join('') : '<p style="color:#aaa;font-size:13px">Koi deliverable nahi</p>'}
-      </div>
-      ${task.Status==='Review'?`
-        <input class="remarks-input" id="modal-remarks" placeholder="Remarks (optional)"/>
-        <div class="modal-actions">
-          <button class="btn-primary" style="background:#2e7d32" onclick="modalUpdate('${taskId}','Approved')">✓ Approve</button>
-          <button class="btn-primary" style="background:#c62828" onclick="modalUpdate('${taskId}','Rejected')">✗ Reject</button>
-        </div>`:''}
-    `;
-    openModal('taskModal');
-  }
-
-  async function modalUpdate(taskId, status) {
-    const remarks = document.getElementById('modal-remarks')?.value || '';
-    try {
-      await api({ action:'updateStatus', taskId, newStatus:status, userName:user.name, userRole:'owner', remarks });
-      showToast(`Task ${status}!`); closeModal(); loadDashboard(); loadTasks();
-    } catch(e) { showToast('Error'); }
-  }
-
-  async function loadAgencyRequests() {
-    try {
-      const data = await api({ action:'getAgencyRequests' });
-      if (data.success) {
-        const reqs = data.requests;
-        document.getElementById('ar-pending').textContent  = reqs.filter(r=>r.Status==='Pending').length;
-        document.getElementById('ar-done').textContent     = reqs.filter(r=>r.Status==='Done').length;
-        document.getElementById('ar-rejected').textContent = reqs.filter(r=>r.Status==='Rejected').length;
-        const grid = document.getElementById('owner-requests-grid');
-        if (!reqs.length) {
-          grid.innerHTML = '<div class="empty-state"><p>Koi request nahi</p></div>';
-          return;
-        }
-        grid.innerHTML = reqs.map(r => `
-          <div class="req-card status-${(r.Status||'pending').toLowerCase()}">
-            <div class="req-card-head">
-              <h3>${r.Title}</h3>
-              <span class="badge badge-${(r.Status||'pending').toLowerCase()}">${r.Status||'Pending'}</span>
-            </div>
-            <p style="font-size:13px;color:#555;margin-bottom:8px">${r.Description||'—'}</p>
-            <div class="req-meta">
-              <div class="req-meta-item">Type: <strong>${r.Type||'—'}</strong></div>
-              <div class="req-meta-item">Due: <strong>${formatDate(r.Due_Date)}</strong></div>
-              <div class="req-meta-item">From: <strong>${r.Created_By||'—'}</strong></div>
-              ${r.Remarks ? `<div class="req-meta-item">Remarks: <strong>${r.Remarks}</strong></div>` : ''}
-            </div>
-          </div>
-        `).join('');
-      }
-    } catch(e) { showToast('Error loading requests'); }
-  }
-
-  async function loadLog() {
-    try {
-      const data = await api({ action: 'getActivityLog' });
-      const tbody = document.getElementById('log-tbody');
-      tbody.innerHTML = (data.success && data.logs.length)
-        ? data.logs.map(l=>`<tr>
-            <td style="font-size:11px;color:#aaa">${formatDateTime(l.Timestamp)}</td>
-            <td><strong>${l.User_Name}</strong></td>
-            <td>${badgeHtml(l.User_Role)}</td>
-            <td>${l.Action}</td>
-            <td style="font-size:11px;color:#888">${l.Task_Title||'—'}</td>
-            <td style="font-size:12px;color:#888">${l.Remarks||'—'}</td>
-          </tr>`).join('')
-        : '<tr><td colspan="6" class="empty-state"><p>Koi activity nahi</p></td></tr>';
-    } catch(e) {}
-  }
-</script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script src="owner.js"></script>
 </body>
 </html>
