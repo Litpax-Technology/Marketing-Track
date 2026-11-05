@@ -45,7 +45,7 @@ function renderAll() {
 // ── TO-DO ──────────────────────────────────────────────
 function renderTodo(tasks) {
   const tbody = document.getElementById('todo-tbody');
-  if (!tasks.length) { tbody.innerHTML = emptyRow(7, 'Sab kaam ho gaya ✅'); return; }
+  if (!tasks.length) { tbody.innerHTML = emptyRow(7, 'All caught up ✅'); return; }
   tbody.innerHTML = tasks.map(t => {
     const id = esc(t.Task_ID);
     const internal = !isAgencyTask(t);
@@ -59,7 +59,7 @@ function renderTodo(tasks) {
       <td>${dueHtml(t)}</td>
       <td>
         <button class="action-btn btn-view" onclick="viewTask('${id}')">View</button>
-        ${!internal ? `<button class="action-btn btn-forward" onclick="forwardTask('${id}')">→ Agency ko bhejo</button>` : ''}
+        ${!internal ? `<button class="action-btn btn-forward" onclick="forwardTask('${id}')">→ Send to agency</button>` : ''}
       </td>
     </tr>`;
   }).join('');
@@ -77,13 +77,13 @@ async function tickTask(taskId, chk) {
 }
 
 async function reopenTask(taskId) {
-  if (await taskOp(taskId, 'reopen')) { showToast('↺ Wapas To-Do mein'); closeModal(); loadTasks(); }
+  if (await taskOp(taskId, 'reopen')) { showToast('↺ Moved back to To-Do'); closeModal(); loadTasks(); }
 }
 
 // ── AGENCY KE PAAS ─────────────────────────────────────
 function renderAgency(tasks) {
   const tbody = document.getElementById('agency-tbody');
-  if (!tasks.length) { tbody.innerHTML = emptyRow(6, 'Agency ke paas abhi kuch nahi'); return; }
+  if (!tasks.length) { tbody.innerHTML = emptyRow(6, 'Nothing with the agency right now'); return; }
   tbody.innerHTML = tasks.map(t => {
     const id = esc(t.Task_ID);
     return `<tr>
@@ -95,7 +95,7 @@ function renderAgency(tasks) {
       <td>${dueHtml(t)}</td>
       <td>
         <button class="action-btn btn-view" onclick="viewTask('${id}')">View</button>
-        <button class="action-btn btn-progress" onclick="sendReview('${id}')">→ Review bhejo</button>
+        <button class="action-btn btn-progress" onclick="sendReview('${id}')">→ Send for review</button>
       </td>
     </tr>`;
   }).join('');
@@ -104,7 +104,7 @@ function renderAgency(tasks) {
 // ── OWNER REVIEW ───────────────────────────────────────
 function renderReview(tasks) {
   const tbody = document.getElementById('review-tbody');
-  if (!tasks.length) { tbody.innerHTML = emptyRow(6, 'Owner ke paas kuch pending nahi'); return; }
+  if (!tasks.length) { tbody.innerHTML = emptyRow(6, 'Nothing pending with the owner'); return; }
   tbody.innerHTML = tasks.map(t => `<tr>
       <td><strong>${esc(t.Title)}</strong></td>
       <td>${taskForBadge(t)}</td>
@@ -121,7 +121,7 @@ function renderDone() {
   let tasks = allTasks.filter(t => FINAL.includes(t.Status));
   if (doneFilter !== 'all') tasks = tasks.filter(t => t.Status === doneFilter);
   tasks = sortByCompleted(tasks);
-  if (!tasks.length) { tbody.innerHTML = emptyRow(6, 'Abhi koi record nahi'); return; }
+  if (!tasks.length) { tbody.innerHTML = emptyRow(6, 'No records yet'); return; }
   tbody.innerHTML = tasks.map(t => {
     const id = esc(t.Task_ID);
     return `<tr class="${t.Status === 'Cancelled' ? 'row-cancelled' : ''}">
@@ -146,7 +146,7 @@ async function forwardTask(taskId) {
   await openTaskModal(t, `
     <div class="action-row">
       <select id="fw-agency"></select>
-      <input class="remarks-input" id="fw-remarks" placeholder="Agency ke liye instruction (optional)"/>
+      <input class="remarks-input" id="fw-remarks" placeholder="Instructions for the agency (optional)"/>
       <button class="btn-primary" onclick="doForward('${esc(taskId)}')">→ Forward</button>
     </div>`);
   fillAgencySelect(document.getElementById('fw-agency'), t.Agency_Person);
@@ -155,24 +155,24 @@ async function forwardTask(taskId) {
 async function doForward(taskId) {
   const agencyPerson = document.getElementById('fw-agency').value;
   const reason = document.getElementById('fw-remarks').value.trim();
-  if (!agencyPerson) return showToast('Agency select karo!');
+  if (!agencyPerson) return showToast('Please select an agency.');
   if (await taskOp(taskId, 'forward', { agencyPerson, reason })) {
-    showToast('✅ Agency ko forward ho gaya'); closeModal(); loadTasks();
+    showToast('✅ Forwarded to agency'); closeModal(); loadTasks();
   }
 }
 
 async function sendReview(taskId) {
-  const reason = await askReason('Owner ko review ke liye bhejo', 'Remarks (optional)', false);
+  const reason = await askReason('Send to owner for review', 'Remarks (optional)', false);
   if (reason === null) return;
-  if (await taskOp(taskId, 'submit', { reason: reason || 'Employee ne review bheja' })) {
-    showToast('✅ Owner review mein bhej diya'); closeModal(); loadTasks();
+  if (await taskOp(taskId, 'submit', { reason: reason || 'Sent for review by employee' })) {
+    showToast('✅ Sent for owner review'); closeModal(); loadTasks();
   }
 }
 
 async function cancelTask(taskId) {
-  const reason = await askReason('Task cancel karo', 'Reason likho (zaroori)', true);
+  const reason = await askReason('Cancel task', 'Reason (required)', true);
   if (reason === null) return;
-  if (await taskOp(taskId, 'cancel', { reason })) { showToast('Task cancel ho gaya'); closeModal(); loadTasks(); }
+  if (await taskOp(taskId, 'cancel', { reason })) { showToast('Task cancelled'); closeModal(); loadTasks(); }
 }
 
 async function completeFromModal(taskId) {
@@ -192,12 +192,12 @@ function viewTask(taskId) {
   } else if (b === 'todo') {
     return forwardTask(taskId);
   } else if (b === 'agency') {
-    actions = `<button class="btn-primary" onclick="sendReview('${id}')">→ Owner review bhejo</button>`;
+    actions = `<button class="btn-primary" onclick="sendReview('${id}')">→ Send for owner review</button>`;
   } else if (b === 'done' && !isAgencyTask(t) && t.Status === 'Approved') {
     actions = `<button class="btn-ghost" onclick="reopenTask('${id}')">↺ Reopen</button>`;
   }
   if (!FINAL.includes(t.Status) && t.Created_By === user.name) {
-    actions += `<br><button class="btn-danger-text" onclick="cancelTask('${id}')">Task cancel karo</button>`;
+    actions += `<br><button class="btn-danger-text" onclick="cancelTask('${id}')">Cancel task</button>`;
   }
   openTaskModal(t, actions);
 }
@@ -214,13 +214,13 @@ async function assignToAgency() {
   const description = document.getElementById('a-desc').value.trim();
   const agencyPerson = document.getElementById('a-agency').value;
   const dueDate = document.getElementById('a-due').value;
-  if (!title || !type || !priority || !agencyPerson) return showToast('Sab required fields bharo!');
+  if (!title || !type || !priority || !agencyPerson) return showToast('Please fill all required fields.');
   const btn = document.getElementById('assignBtn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Assigning...';
   try {
     const d = await api({ action: 'createEmployeeTask', title, type, priority, description, agencyPerson, dueDate });
     if (d.success) {
-      showToast('✅ Agency ko assign ho gaya');
+      showToast('✅ Assigned to agency');
       ['a-title', 'a-type', 'a-priority', 'a-desc', 'a-due'].forEach(id => document.getElementById(id).value = '');
       loadTasks();
     } else showToast(d.message || 'Error');
@@ -240,7 +240,7 @@ async function loadAgencyRequests() {
     document.getElementById('ar-rejected').textContent = reqs.filter(r => r.Status === 'Rejected').length;
     setCount('c-req', pending);
     const grid = document.getElementById('requests-grid');
-    grid.innerHTML = !reqs.length ? '<div class="empty-state"><p>Koi request nahi hai</p></div>' : reqs.map(r => {
+    grid.innerHTML = !reqs.length ? '<div class="empty-state"><p>No requests</p></div>' : reqs.map(r => {
       const st = (r.Status || 'Pending').toLowerCase();
       return `<div class="req-card status-${esc(st)}">
         <div class="req-card-head"><h3>${esc(r.Title)}</h3>${badgeHtml(r.Status || 'Pending')}</div>
@@ -263,7 +263,7 @@ async function loadAgencyRequests() {
 async function updateRequest(reqId, newStatus) {
   let reason = '';
   if (newStatus === 'Rejected') {
-    reason = await askReason('Request reject karo', 'Reason (zaroori)', true);
+    reason = await askReason('Reject request', 'Reason (required)', true);
     if (reason === null) return;
   }
   try {
