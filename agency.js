@@ -39,7 +39,7 @@ function renderTaskCards() {
 
   const grid = document.getElementById('tasks-grid');
   if (!tasks.length) {
-    grid.innerHTML = `<div class="empty-state"><p>${aFilter === 'active' ? 'Abhi koi kaam pending nahi ✅' : 'Kuch nahi'}</p></div>`;
+    grid.innerHTML = `<div class="empty-state"><p>${aFilter === 'active' ? 'Nothing pending ✅' : 'Nothing here'}</p></div>`;
     return;
   }
   grid.innerHTML = tasks.map(t => {
@@ -48,8 +48,8 @@ function renderTaskCards() {
     return `<div class="task-card priority-${esc(t.Priority || 'Low')}">
       <div class="task-card-head"><h3>${esc(t.Title)}</h3>${badgeHtml(t.Status)}</div>
       ${t.Status === 'Rejected' && t.Reject_Reason
-        ? `<div class="reject-box">❌ <strong>Kya theek karna hai:</strong> ${esc(t.Reject_Reason)} ${reworkHtml(t)}</div>` : ''}
-      <p class="task-desc">${esc(t.Description || 'Koi description nahi')}</p>
+        ? `<div class="reject-box">❌ <strong>What needs fixing:</strong> ${esc(t.Reject_Reason)} ${reworkHtml(t)}</div>` : ''}
+      <p class="task-desc">${esc(t.Description || 'No description')}</p>
       <div class="task-meta">
         <div class="task-meta-item">Type: <strong>${esc(t.Type || '—')}</strong></div>
         <div class="task-meta-item">Due: <strong>${t.Status === 'Approved' ? formatDate(t.Due_Date) : dueHtml(t)}</strong></div>
@@ -97,7 +97,7 @@ async function renderPrevUploads(taskId) {
     el.innerHTML = dels.length ? dels.map(x => `<div class="del-item">
         <a href="${safeUrl(x.File_Link)}" target="_blank" rel="noopener">🔗 ${esc(x.Description || 'File')}</a>
         <div class="del-meta">${formatDateTime(x.Upload_Date)} · ${badgeHtml(x.Status)}${x.Owner_Remarks ? ' · ' + esc(x.Owner_Remarks) : ''}</div>
-      </div>`).join('') : '<p class="muted">Abhi kuch upload nahi</p>';
+      </div>`).join('') : '<p class="muted">Nothing uploaded yet</p>';
   } catch (e) { el.innerHTML = ''; }
 }
 
@@ -106,9 +106,9 @@ async function doUpload(taskId) {
   const file = document.getElementById('up-file').files[0];
   const fileLink = document.getElementById('up-link').value.trim();
   const description = document.getElementById('up-desc').value.trim();
-  if (!file && !fileLink) return showToast('File chuno ya link daalo!');
-  if (!description) return showToast('Description likho!');
-  if (file && file.size > MAX_UPLOAD_MB * 1024 * 1024) return showToast('File ' + MAX_UPLOAD_MB + 'MB se badi hai — Drive link daalo');
+  if (!file && !fileLink) return showToast('Please choose a file or add a link.');
+  if (!description) return showToast('Please add a description.');
+  if (file && file.size > MAX_UPLOAD_MB * 1024 * 1024) return showToast('File is larger than ' + MAX_UPLOAD_MB + 'MB — please share a Drive link instead');
 
   const btn = document.getElementById('up-btn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Uploading...';
@@ -120,18 +120,18 @@ async function doUpload(taskId) {
     if (d.success) {
       ['up-file', 'up-link', 'up-desc'].forEach(i => document.getElementById(i).value = '');
       renderPrevUploads(taskId);
-      showToast('✅ Upload ho gaya. Kaam poora ho toh "Submit for Review" dabao.');
+      showToast('✅ Uploaded. When the work is complete, click "Submit for Review".');
     } else showToast(d.message || 'Error');
-  } catch (e) { if (e.message !== 'auth') showToast('Upload fail — internet check karo'); }
+  } catch (e) { if (e.message !== 'auth') showToast('Upload failed — please check your connection'); }
   btn.disabled = false; btn.innerHTML = 'Upload';
 }
 
 async function submitTask(taskId) {
   const t = allTasks.find(x => x.Task_ID === taskId);
-  const reason = await askReason('Review ke liye bhejo', 'Litpax ke liye note (optional)', false);
+  const reason = await askReason('Submit for review', 'Note for Litpax (optional)', false);
   if (reason === null) return;
-  if (await taskOp(taskId, 'submit', { reason: reason || (t && t.Status === 'Rejected' ? 'Rework karke dobara bheja' : 'Kaam complete') })) {
-    showToast('✅ Review ke liye bhej diya'); closeModal(); loadTasks();
+  if (await taskOp(taskId, 'submit', { reason: reason || (t && t.Status === 'Rejected' ? 'Resubmitted after rework' : 'Work completed') })) {
+    showToast('✅ Submitted for review'); closeModal(); loadTasks();
   }
 }
 
@@ -141,7 +141,7 @@ async function loadDeliverables() {
   try {
     const d = await api({ action: 'getDeliverables' });
     const mine = d.success ? d.deliverables : [];
-    tbody.innerHTML = !mine.length ? emptyRow(6, 'Abhi koi upload nahi') : mine.map(x => `<tr>
+    tbody.innerHTML = !mine.length ? emptyRow(6, 'No uploads yet') : mine.map(x => `<tr>
         <td><strong>${esc(x.Task_Title || '—')}</strong></td>
         <td>${esc(x.Description || '—')}</td>
         <td><a href="${safeUrl(x.File_Link)}" target="_blank" rel="noopener" style="color:#4a148c;font-weight:500">🔗 Open</a></td>
@@ -149,7 +149,7 @@ async function loadDeliverables() {
         <td>${badgeHtml(x.Status)}</td>
         <td class="small">${esc(x.Owner_Remarks || '—')}</td>
       </tr>`).join('');
-  } catch (e) { if (e.message !== 'auth') tbody.innerHTML = emptyRow(6, 'Load nahi hua'); }
+  } catch (e) { if (e.message !== 'auth') tbody.innerHTML = emptyRow(6, 'Could not load'); }
 }
 
 // ── REQUESTS ───────────────────────────────────────────
@@ -158,7 +158,7 @@ async function loadMyRequests() {
   try {
     const d = await api({ action: 'getAgencyRequests' });
     const mine = d.success ? d.requests : [];
-    tbody.innerHTML = !mine.length ? emptyRow(6, 'Koi request nahi') : mine.map(r => `<tr>
+    tbody.innerHTML = !mine.length ? emptyRow(6, 'No requests') : mine.map(r => `<tr>
         <td><strong>${esc(r.Title || '—')}</strong><br><small class="muted">${esc(r.Description || '')}</small></td>
         <td>${esc(r.Type || '—')}</td>
         <td>${formatDate(r.Due_Date)}</td>
@@ -166,7 +166,7 @@ async function loadMyRequests() {
         <td>${badgeHtml(r.Status || 'Pending')}</td>
         <td class="small muted">${formatDate(r.Created_At)}</td>
       </tr>`).join('');
-  } catch (e) { if (e.message !== 'auth') tbody.innerHTML = emptyRow(6, 'Load nahi hua'); }
+  } catch (e) { if (e.message !== 'auth') tbody.innerHTML = emptyRow(6, 'Could not load'); }
 }
 
 async function submitRequest() {
@@ -175,13 +175,13 @@ async function submitRequest() {
   const dueDate = document.getElementById('r-due').value;
   const description = document.getElementById('r-desc').value.trim();
   const remarks = document.getElementById('r-remarks').value.trim();
-  if (!title || !type || !description) return showToast('Title, Type aur Description required!');
+  if (!title || !type || !description) return showToast('Title, Type and Description are required.');
   const btn = document.getElementById('reqBtn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Sending...';
   try {
     const d = await api({ action: 'createAgencyRequest', title, type, dueDate, description, remarks });
     if (d.success) {
-      showToast('✅ Request bhej di');
+      showToast('✅ Request sent');
       ['r-title', 'r-type', 'r-due', 'r-desc', 'r-remarks'].forEach(i => document.getElementById(i).value = '');
       showSection('requests'); loadMyRequests();
     } else showToast(d.message || 'Error');
