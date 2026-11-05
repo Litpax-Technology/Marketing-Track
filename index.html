@@ -3,25 +3,91 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#0b0f2e"/>
 <title>Litpax Marketing Hub — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"/>
 <link rel="stylesheet" href="style.css"/>
 </head>
 <body class="login-page">
-<div class="login-wrap">
-  <div class="brand">
-    <div class="brand-logo"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-    <h1>Litpax Marketing Hub</h1>
-    <p>Marketing Command Center</p>
-  </div>
-  <div class="login-card">
-    <h2>Enter your PIN</h2>
-    <label for="pinInput">4-digit PIN</label>
-    <input type="password" class="pin-input" id="pinInput" maxlength="4" placeholder="••••" inputmode="numeric" autocomplete="off"/>
-    <button class="login-btn" id="loginBtn">Login</button>
-    <div class="login-error" id="errMsg"></div>
-    <div class="login-hint">🔒 Owner · Employee · Marketing Agency</div>
-  </div>
+
+<!-- Animated background -->
+<div class="lg-bg" aria-hidden="true">
+  <span class="orb orb-1"></span>
+  <span class="orb orb-2"></span>
+  <span class="orb orb-3"></span>
+  <div class="lg-grid"></div>
+  <div class="lg-sparks"></div>
 </div>
+
+<main class="lg-shell">
+
+  <!-- Brand side -->
+  <section class="lg-brand">
+    <div class="lg-logo anim" style="--d:0">
+      <svg viewBox="0 0 24 24" class="bolt"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    </div>
+    <p class="lg-eyebrow anim" style="--d:1">Litpax Technology</p>
+    <h1 class="lg-title anim" style="--d:2">Marketing<br/><span class="grad-text">Command Center</span></h1>
+    <p class="lg-sub anim" style="--d:3">Har campaign, har deliverable, har approval — ek jagah.</p>
+
+    <ul class="lg-features">
+      <li class="anim" style="--d:4"><span class="fi">✓</span><div><strong>To-Do jo khud saaf ho</strong><small>Tick karo, kaam record mein chala jaata hai</small></div></li>
+      <li class="anim" style="--d:5"><span class="fi">⇄</span><div><strong>Agency ke saath seedha kaam</strong><small>Upload, comments, rework — sab tracked</small></div></li>
+      <li class="anim" style="--d:6"><span class="fi">★</span><div><strong>Owner approval ek click mein</strong><small>Overdue aur review queue upar hi</small></div></li>
+    </ul>
+
+    <div class="lg-battery anim" style="--d:7" aria-hidden="true">
+      <div class="bat"><div class="bat-fill"></div><svg viewBox="0 0 24 24" class="bat-bolt"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <span>Powered by Litpax MIS</span>
+    </div>
+  </section>
+
+  <!-- Login card -->
+  <section class="lg-card-wrap">
+    <div class="lg-card" id="lgCard">
+      <div class="lg-card-glow" aria-hidden="true"></div>
+
+      <div class="lg-state" id="stateForm">
+        <div class="lg-card-logo"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <h2>Welcome back</h2>
+        <p class="lg-hint">Apna 4-digit PIN daalo</p>
+
+        <div class="pin-row" id="pinRow" role="group" aria-label="4-digit PIN">
+          <input class="pin-box" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN digit 1"/>
+          <input class="pin-box" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN digit 2"/>
+          <input class="pin-box" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN digit 3"/>
+          <input class="pin-box" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN digit 4"/>
+        </div>
+
+        <button class="pin-toggle" id="pinToggle" type="button">👁 PIN dikhao</button>
+
+        <button class="login-btn" id="loginBtn" type="button">
+          <span class="btn-label">Login</span>
+          <span class="btn-arrow">→</span>
+        </button>
+
+        <div class="login-error" id="errMsg" role="alert"></div>
+
+        <div class="role-chips">
+          <span class="chip" data-role="owner"><i style="--c:#7986cb"></i>Owner</span>
+          <span class="chip" data-role="employee"><i style="--c:#66bb6a"></i>Employee</span>
+          <span class="chip" data-role="agency"><i style="--c:#ba68c8"></i>Agency</span>
+        </div>
+      </div>
+
+      <div class="lg-state lg-success" id="stateSuccess" aria-live="polite">
+        <svg class="check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-15"/></svg>
+        <h2 id="welcomeName">Welcome!</h2>
+        <p class="lg-hint" id="welcomeRole">Dashboard khul raha hai…</p>
+        <div class="lg-progress"><span></span></div>
+      </div>
+    </div>
+    <p class="lg-foot">🔒 Secure PIN login · Litpax Technology Pvt. Ltd.</p>
+  </section>
+
+</main>
+
 <script src="config.js"></script>
 <script src="app.js"></script>
 <script src="login.js"></script>
