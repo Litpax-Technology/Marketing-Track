@@ -64,7 +64,7 @@ function getPin() { return boxes.map(b => b.value).join(''); }
 function togglePin() {
   const show = boxes[0].type === 'password';
   boxes.forEach(b => b.type = show ? 'text' : 'password');
-  document.getElementById('pinToggle').textContent = show ? '🙈 PIN chhupao' : '👁 PIN dikhao';
+  document.getElementById('pinToggle').textContent = show ? '🙈 Hide PIN' : '👁 Show PIN';
 }
 
 function clearError() {
@@ -93,7 +93,7 @@ function setLoading(on) {
 async function doLogin() {
   if (busy) return;
   const pin = getPin();
-  if (!/^\d{4}$/.test(pin)) { showErr('Poore 4 digit daalo.'); return; }
+  if (!/^\d{4}$/.test(pin)) { showErr('Please enter all 4 digits.'); return; }
   busy = true;
   clearError();
   setLoading(true);
@@ -106,11 +106,11 @@ async function doLogin() {
       return;
     }
     setLoading(false);
-    showErr('Galat PIN. Dobara try karo.');
+    showErr('Incorrect PIN. Please try again.');
     resetBoxes();
   } catch (e) {
     setLoading(false);
-    showErr('Network error. Internet check karo.');
+    showErr('Network error. Please check your connection.');
   }
   busy = false;
 }
@@ -127,7 +127,7 @@ function showSuccess(data) {
   document.getElementById('pinRow').classList.add('ok');
   setTimeout(() => {
     document.getElementById('welcomeName').textContent = 'Welcome, ' + data.name + '!';
-    document.getElementById('welcomeRole').textContent = ROLE_LABEL[data.role] + ' dashboard khul raha hai…';
+    document.getElementById('welcomeRole').textContent = 'Opening ' + ROLE_LABEL[data.role] + ' dashboard…';
     document.getElementById('lgCard').classList.add('success');
     document.body.classList.add('theme-' + data.role);
   }, 350);
