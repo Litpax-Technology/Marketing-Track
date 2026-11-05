@@ -31,26 +31,26 @@
   <!-- DASHBOARD -->
   <div class="section active" id="section-dashboard">
     <div class="page-header">
-      <div><h1>Dashboard</h1><p>Marketing ka full overview</p></div>
+      <div><h1>Dashboard</h1><p>Complete marketing overview</p></div>
       <button class="btn-primary" onclick="refreshAll()">🔄 Refresh</button>
     </div>
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-label">Active Tasks</div><div class="stat-value" id="stat-active">—</div><div class="stat-sub">Abhi chal rahe</div></div>
-      <div class="stat-card"><div class="stat-label">Pending Review</div><div class="stat-value" id="stat-review">—</div><div class="stat-sub">Aapka approval</div></div>
-      <div class="stat-card amber"><div class="stat-label">Rework</div><div class="stat-value" id="stat-rejected">—</div><div class="stat-sub">Reject hoke wapas gaye</div></div>
-      <div class="stat-card red"><div class="stat-label">Overdue</div><div class="stat-value" id="stat-overdue">—</div><div class="stat-sub">Due date nikal gayi</div></div>
+      <div class="stat-card"><div class="stat-label">Active Tasks</div><div class="stat-value" id="stat-active">—</div><div class="stat-sub">Currently open</div></div>
+      <div class="stat-card"><div class="stat-label">Pending Review</div><div class="stat-value" id="stat-review">—</div><div class="stat-sub">Needs your approval</div></div>
+      <div class="stat-card amber"><div class="stat-label">Rework</div><div class="stat-value" id="stat-rejected">—</div><div class="stat-sub">Rejected, sent back</div></div>
+      <div class="stat-card red"><div class="stat-label">Overdue</div><div class="stat-value" id="stat-overdue">—</div><div class="stat-sub">Past due date</div></div>
     </div>
     <div class="stats-grid col5">
       <div class="stat-card green"><div class="stat-label">Completed</div><div class="stat-value" id="stat-approved">—</div><div class="stat-sub">Approved</div></div>
       <div class="stat-card"><div class="stat-label">Internal</div><div class="stat-value" id="stat-internal">—</div><div class="stat-sub">Employee only</div></div>
       <div class="stat-card"><div class="stat-label">Agency</div><div class="stat-value" id="stat-agency">—</div><div class="stat-sub">Via agency</div></div>
-      <div class="stat-card"><div class="stat-label">Avg time</div><div class="stat-value" id="stat-avg">—</div><div class="stat-sub">Din, create → complete</div></div>
-      <div class="stat-card"><div class="stat-label">Agency on-time</div><div class="stat-value" id="stat-ontime">—</div><div class="stat-sub">Due date tak complete</div></div>
+      <div class="stat-card"><div class="stat-label">Avg time</div><div class="stat-value" id="stat-avg">—</div><div class="stat-sub">Days, created → completed</div></div>
+      <div class="stat-card"><div class="stat-label">Agency on-time</div><div class="stat-value" id="stat-ontime">—</div><div class="stat-sub">Completed by due date</div></div>
     </div>
     <div id="alerts"></div>
     <div class="table-card" style="margin-bottom:20px">
       <div class="table-header"><h3>🔍 Review Pending</h3></div>
-      <table><thead><tr><th>Task</th><th>Type</th><th>For</th><th>Agency</th><th>Bheja</th><th>Due</th><th>Action</th></tr></thead>
+      <table><thead><tr><th>Task</th><th>Type</th><th>For</th><th>Agency</th><th>Sent</th><th>Due</th><th>Action</th></tr></thead>
       <tbody id="review-tbody"><tr><td colspan="7" class="empty-state"><p>Loading...</p></td></tr></tbody></table>
     </div>
     <div class="table-card">
@@ -62,12 +62,12 @@
 
   <!-- CREATE TASK -->
   <div class="section" id="section-create">
-    <div class="page-header"><div><h1>New Task</h1><p>Employee ya Agency ke liye task create karo</p></div></div>
+    <div class="page-header"><div><h1>New Task</h1><p>Create a task for the employee or the agency</p></div></div>
     <div class="form-card">
       <h3>Task Details</h3>
       <div class="form-grid">
         <div class="form-group full">
-          <label>Task Kiske Liye Hai? *</label>
+          <label>Who is this task for? *</label>
           <div class="task-for-toggle">
             <button class="task-for-btn active" id="btn-internal" onclick="setTaskFor(TASK_FOR_INTERNAL)">👤 Employee Only (Internal)</button>
             <button class="task-for-btn" id="btn-agency" onclick="setTaskFor(TASK_FOR_AGENCY)">🏢 Employee → Agency</button>
@@ -89,7 +89,7 @@
         <div class="form-group full"><label>Description</label><textarea id="f-desc" placeholder="Task detail..."></textarea></div>
         <div class="form-group"><label>Due Date</label><input type="date" id="f-due"/></div>
         <div class="form-group agency-field" id="agency-field-wrap">
-          <label>Agency (optional — employee bhi chun sakta hai)</label>
+          <label>Agency (optional — employee can choose later)</label>
           <select id="f-agency"></select>
         </div>
       </div>
@@ -101,20 +101,20 @@
   <!-- ALL TASKS -->
   <div class="section" id="section-tasks">
     <div class="page-header">
-      <div><h1>All Tasks</h1><p>Internal aur agency — bucket-wise</p></div>
+      <div><h1>All Tasks</h1><p>Internal and agency tasks, by stage</p></div>
       <button class="btn-primary" onclick="loadTasks()">🔄 Refresh</button>
     </div>
     <div class="table-card">
       <div class="table-header">
         <div class="filter-bar">
           <button class="filter-btn active" onclick="setActiveBtn(this);tFilter.bucket='todo';renderTasks()">To-Do <span id="tc-todo"></span></button>
-          <button class="filter-btn" onclick="setActiveBtn(this);tFilter.bucket='agency';renderTasks()">Agency ke paas <span id="tc-agency"></span></button>
+          <button class="filter-btn" onclick="setActiveBtn(this);tFilter.bucket='agency';renderTasks()">With Agency <span id="tc-agency"></span></button>
           <button class="filter-btn" onclick="setActiveBtn(this);tFilter.bucket='review';renderTasks()">Review <span id="tc-review"></span></button>
           <button class="filter-btn" onclick="setActiveBtn(this);tFilter.bucket='done';renderTasks()">Completed</button>
           <button class="filter-btn" onclick="setActiveBtn(this);tFilter.bucket='all';renderTasks()">All</button>
         </div>
         <div class="filter-bar">
-          <button class="filter-btn active" onclick="setActiveBtn(this);tFilter.forType='all';renderTasks()">Sab</button>
+          <button class="filter-btn active" onclick="setActiveBtn(this);tFilter.forType='all';renderTasks()">All</button>
           <button class="filter-btn" onclick="setActiveBtn(this);tFilter.forType='internal';renderTasks()">👤 Internal</button>
           <button class="filter-btn" onclick="setActiveBtn(this);tFilter.forType='agency';renderTasks()">🏢 Agency</button>
         </div>
@@ -127,11 +127,11 @@
   <!-- AGENCY REQUESTS — READONLY -->
   <div class="section" id="section-requests">
     <div class="page-header">
-      <div><h1>Agency Requests</h1><p>Agency ne employee se kya manga</p></div>
+      <div><h1>Agency Requests</h1><p>What the agency has asked the employee for</p></div>
       <button class="btn-primary" onclick="loadAgencyRequests()">🔄 Refresh</button>
     </div>
     <div class="stats-grid col3">
-      <div class="stat-card amber"><div class="stat-label">Pending</div><div class="stat-value" id="ar-pending">—</div><div class="stat-sub">Employee ka wait</div></div>
+      <div class="stat-card amber"><div class="stat-label">Pending</div><div class="stat-value" id="ar-pending">—</div><div class="stat-sub">Awaiting employee</div></div>
       <div class="stat-card green"><div class="stat-label">Done</div><div class="stat-value" id="ar-done">—</div><div class="stat-sub">Complete</div></div>
       <div class="stat-card red"><div class="stat-label">Rejected</div><div class="stat-value" id="ar-rejected">—</div><div class="stat-sub">Rejected</div></div>
     </div>
@@ -141,7 +141,7 @@
   <!-- ACTIVITY LOG -->
   <div class="section" id="section-log">
     <div class="page-header">
-      <div><h1>Activity Log</h1><p>Har action ka complete record</p></div>
+      <div><h1>Activity Log</h1><p>Complete record of every action</p></div>
       <button class="btn-primary" onclick="loadLog()">🔄 Refresh</button>
     </div>
     <div class="table-card">
