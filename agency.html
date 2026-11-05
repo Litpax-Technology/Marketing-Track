@@ -30,20 +30,20 @@
   <!-- TASKS -->
   <div class="section active" id="section-tasks">
     <div class="page-header">
-      <div><h1>My Tasks</h1><p>Kaam upload karo, phir "Submit for Review" dabao</p></div>
+      <div><h1>My Tasks</h1><p>Upload your work, then click "Submit for Review"</p></div>
       <button class="btn-primary" onclick="loadTasks()">🔄 Refresh</button>
     </div>
     <div class="stats-grid">
-      <div class="stat-card amber"><div class="stat-label">Active</div><div class="stat-value" id="s-active">—</div><div class="stat-sub">Kaam karna hai</div></div>
-      <div class="stat-card red"><div class="stat-label">Rework</div><div class="stat-value" id="s-rework">—</div><div class="stat-sub">Reject hua, dobara bhejo</div></div>
-      <div class="stat-card"><div class="stat-label">Review mein</div><div class="stat-value" id="s-review">—</div><div class="stat-sub">Litpax check kar raha</div></div>
+      <div class="stat-card amber"><div class="stat-label">Active</div><div class="stat-value" id="s-active">—</div><div class="stat-sub">To do</div></div>
+      <div class="stat-card red"><div class="stat-label">Rework</div><div class="stat-value" id="s-rework">—</div><div class="stat-sub">Rejected — resubmit</div></div>
+      <div class="stat-card"><div class="stat-label">In Review</div><div class="stat-value" id="s-review">—</div><div class="stat-sub">Litpax is reviewing</div></div>
       <div class="stat-card green"><div class="stat-label">Approved</div><div class="stat-value" id="s-done">—</div><div class="stat-sub">Complete</div></div>
     </div>
     <div id="alerts"></div>
     <div class="table-card" style="padding:12px 16px;margin-bottom:16px">
       <div class="filter-bar">
         <button class="filter-btn active" onclick="setActiveBtn(this);aFilter='active';renderTaskCards()">Active</button>
-        <button class="filter-btn" onclick="setActiveBtn(this);aFilter='review';renderTaskCards()">Review mein</button>
+        <button class="filter-btn" onclick="setActiveBtn(this);aFilter='review';renderTaskCards()">In Review</button>
         <button class="filter-btn" onclick="setActiveBtn(this);aFilter='done';renderTaskCards()">Approved</button>
       </div>
     </div>
@@ -53,7 +53,7 @@
   <!-- UPLOADS -->
   <div class="section" id="section-deliverables">
     <div class="page-header">
-      <div><h1>My Uploads</h1><p>Saara upload kiya hua kaam</p></div>
+      <div><h1>My Uploads</h1><p>Everything you've uploaded</p></div>
       <button class="btn-primary" onclick="loadDeliverables()">🔄 Refresh</button>
     </div>
     <div class="table-card">
@@ -65,7 +65,7 @@
   <!-- MY REQUESTS -->
   <div class="section" id="section-requests">
     <div class="page-header">
-      <div><h1>My Requests</h1><p>Litpax ko bheje hue requests</p></div>
+      <div><h1>My Requests</h1><p>Requests you've sent to Litpax</p></div>
       <button class="btn-primary" onclick="loadMyRequests()">🔄 Refresh</button>
     </div>
     <div class="table-card">
@@ -76,18 +76,18 @@
 
   <!-- NEW REQUEST -->
   <div class="section" id="section-newrequest">
-    <div class="page-header"><div><h1>New Request</h1><p>Litpax se kuch chahiye toh yahan daalo</p></div></div>
+    <div class="page-header"><div><h1>New Request</h1><p>Need something from Litpax? Ask here</p></div></div>
     <div class="form-card">
       <h3>Request Details</h3>
       <div class="form-grid">
-        <div class="form-group full"><label>Title *</label><input type="text" id="r-title" maxlength="200" placeholder="e.g. Product photos chahiye"/></div>
+        <div class="form-group full"><label>Title *</label><input type="text" id="r-title" maxlength="200" placeholder="e.g. Need product photos"/></div>
         <div class="form-group">
           <label>Type *</label>
           <select id="r-type"><option value="">Select</option><option>Pictures</option><option>Content</option><option>Video</option><option>Other</option></select>
         </div>
         <div class="form-group"><label>Due Date</label><input type="date" id="r-due"/></div>
-        <div class="form-group full"><label>Description *</label><textarea id="r-desc" placeholder="Kya chahiye detail mein..."></textarea></div>
-        <div class="form-group full"><label>Remarks</label><textarea id="r-remarks" placeholder="Koi special requirement..."></textarea></div>
+        <div class="form-group full"><label>Description *</label><textarea id="r-desc" placeholder="Describe what you need..."></textarea></div>
+        <div class="form-group full"><label>Remarks</label><textarea id="r-remarks" placeholder="Any special requirements..."></textarea></div>
       </div>
       <br/>
       <button class="btn-primary" id="reqBtn" onclick="submitRequest()">📨 Send Request</button>
@@ -108,14 +108,14 @@
 <div class="modal-overlay" id="uploadModal">
   <div class="modal">
     <div class="modal-head"><h3 id="up-title">Upload</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
-    <div class="form-group" style="margin-bottom:6px"><label>File chuno (max 20MB)</label><input type="file" id="up-file"/></div>
-    <div class="upload-or">— ya —</div>
-    <div class="form-group" style="margin-bottom:12px"><label>Drive / File Link (badi video ke liye)</label><input type="url" id="up-link" placeholder="https://drive.google.com/..."/></div>
+    <div class="form-group" style="margin-bottom:6px"><label>Choose a file (max 20MB)</label><input type="file" id="up-file"/></div>
+    <div class="upload-or">— or —</div>
+    <div class="form-group" style="margin-bottom:12px"><label>Drive / file link (for large videos)</label><input type="url" id="up-link" placeholder="https://drive.google.com/..."/></div>
     <div class="form-group"><label>Description *</label><input type="text" id="up-desc" maxlength="300" placeholder="e.g. Instagram Post Draft 1"/></div>
     <div class="modal-actions">
       <button class="btn-primary" id="up-btn">Upload</button>
     </div>
-    <div class="deliverables-list"><h4>Is task ke uploads</h4><div id="up-prev"></div></div>
+    <div class="deliverables-list"><h4>Uploads for this task</h4><div id="up-prev"></div></div>
   </div>
 </div>
 
