@@ -3,30 +3,16 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Agency Panel — Litpax Marketing Hub</title>
+<title>Agency — Litpax Marketing Hub</title>
 <link rel="stylesheet" href="style.css"/>
-<style>
-  .sidebar { background: #4a148c; }
-  .nav-item.active { border-left-color: #ce93d8; }
-  .stat-value { color: #4a148c; }
-  .btn-primary { background: #4a148c; }
-  .btn-primary:hover { background: #6a1b9a; }
-  .toast { background: #4a148c; }
-  .form-group input:focus,
-  .form-group textarea:focus,
-  .form-group select:focus { border-color: #4a148c; }
-  .badge-pending  { background: #fff3e0; color: #e65100; }
-  .badge-done     { background: #e8f5e9; color: #2e7d32; }
-  .badge-rejected { background: #ffebee; color: #c62828; }
-</style>
 </head>
-<body>
+<body class="theme-agency">
 
 <div class="sidebar">
   <div class="sidebar-brand"><h2>⚡ Litpax</h2><p>Agency Panel</p></div>
   <nav class="nav">
-    <div class="nav-item active" onclick="showSection('tasks')" id="nav-tasks"><span class="icon">📋</span> My Tasks</div>
-    <div class="nav-item" onclick="showSection('deliverables');loadDeliverables()" id="nav-deliverables"><span class="icon">📁</span> My Deliverables</div>
+    <div class="nav-item active" onclick="showSection('tasks')" id="nav-tasks"><span class="icon">📋</span> My Tasks <span class="nav-count alert" id="c-active"></span></div>
+    <div class="nav-item" onclick="showSection('deliverables');loadDeliverables()" id="nav-deliverables"><span class="icon">📁</span> My Uploads</div>
     <div class="nav-item" onclick="showSection('requests');loadMyRequests()" id="nav-requests"><span class="icon">📝</span> My Requests</div>
     <div class="nav-item" onclick="showSection('newrequest')" id="nav-newrequest"><span class="icon">➕</span> New Request</div>
   </nav>
@@ -44,38 +30,45 @@
   <!-- TASKS -->
   <div class="section active" id="section-tasks">
     <div class="page-header">
-      <div><h1>My Tasks</h1><p>Litpax ne assign kiye hue kaam</p></div>
+      <div><h1>My Tasks</h1><p>Kaam upload karo, phir "Submit for Review" dabao</p></div>
       <button class="btn-primary" onclick="loadTasks()">🔄 Refresh</button>
     </div>
-    <div class="stats-grid col3">
-      <div class="stat-card amber"><div class="stat-label">Active</div><div class="stat-value" id="s-active">—</div><div class="stat-sub">In Progress</div></div>
-      <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value" id="s-pending">—</div><div class="stat-sub">Not started</div></div>
-      <div class="stat-card green"><div class="stat-label">Approved</div><div class="stat-value" id="s-done">—</div><div class="stat-sub">Completed</div></div>
+    <div class="stats-grid">
+      <div class="stat-card amber"><div class="stat-label">Active</div><div class="stat-value" id="s-active">—</div><div class="stat-sub">Kaam karna hai</div></div>
+      <div class="stat-card red"><div class="stat-label">Rework</div><div class="stat-value" id="s-rework">—</div><div class="stat-sub">Reject hua, dobara bhejo</div></div>
+      <div class="stat-card"><div class="stat-label">Review mein</div><div class="stat-value" id="s-review">—</div><div class="stat-sub">Litpax check kar raha</div></div>
+      <div class="stat-card green"><div class="stat-label">Approved</div><div class="stat-value" id="s-done">—</div><div class="stat-sub">Complete</div></div>
+    </div>
+    <div id="alerts"></div>
+    <div class="table-card" style="padding:12px 16px;margin-bottom:16px">
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="setActiveBtn(this);aFilter='active';renderTaskCards()">Active</button>
+        <button class="filter-btn" onclick="setActiveBtn(this);aFilter='review';renderTaskCards()">Review mein</button>
+        <button class="filter-btn" onclick="setActiveBtn(this);aFilter='done';renderTaskCards()">Approved</button>
+      </div>
     </div>
     <div id="tasks-grid" class="tasks-grid"><div class="empty-state"><p>Loading...</p></div></div>
   </div>
 
-  <!-- DELIVERABLES -->
+  <!-- UPLOADS -->
   <div class="section" id="section-deliverables">
     <div class="page-header">
-      <div><h1>My Deliverables</h1><p>Sab uploaded work</p></div>
+      <div><h1>My Uploads</h1><p>Saara upload kiya hua kaam</p></div>
       <button class="btn-primary" onclick="loadDeliverables()">🔄 Refresh</button>
     </div>
     <div class="table-card">
-      <div class="table-header"><h3>Uploaded Files</h3></div>
-      <table><thead><tr><th>Task</th><th>Description</th><th>Link</th><th>Date</th><th>Status</th></tr></thead>
-      <tbody id="del-tbody"><tr><td colspan="5" class="empty-state"><p>Loading...</p></td></tr></tbody></table>
+      <table><thead><tr><th>Task</th><th>Description</th><th>File</th><th>Date</th><th>Status</th><th>Litpax Remarks</th></tr></thead>
+      <tbody id="del-tbody"><tr><td colspan="6" class="empty-state"><p>Loading...</p></td></tr></tbody></table>
     </div>
   </div>
 
   <!-- MY REQUESTS -->
   <div class="section" id="section-requests">
     <div class="page-header">
-      <div><h1>My Requests</h1><p>Employee ko bheje hue requests</p></div>
+      <div><h1>My Requests</h1><p>Litpax ko bheje hue requests</p></div>
       <button class="btn-primary" onclick="loadMyRequests()">🔄 Refresh</button>
     </div>
     <div class="table-card">
-      <div class="table-header"><h3>Requests</h3></div>
       <table><thead><tr><th>Title</th><th>Type</th><th>Due Date</th><th>Remarks</th><th>Status</th><th>Date</th></tr></thead>
       <tbody id="req-tbody"><tr><td colspan="6" class="empty-state"><p>Loading...</p></td></tr></tbody></table>
     </div>
@@ -83,22 +76,14 @@
 
   <!-- NEW REQUEST -->
   <div class="section" id="section-newrequest">
-    <div class="page-header">
-      <div><h1>New Request</h1><p>Employee se kuch mangna ho toh yahan daalo</p></div>
-    </div>
+    <div class="page-header"><div><h1>New Request</h1><p>Litpax se kuch chahiye toh yahan daalo</p></div></div>
     <div class="form-card">
       <h3>Request Details</h3>
       <div class="form-grid">
-        <div class="form-group full"><label>Title *</label><input type="text" id="r-title" placeholder="e.g. Product photos chahiye"/></div>
+        <div class="form-group full"><label>Title *</label><input type="text" id="r-title" maxlength="200" placeholder="e.g. Product photos chahiye"/></div>
         <div class="form-group">
           <label>Type *</label>
-          <select id="r-type">
-            <option value="">Select</option>
-            <option>Pictures</option>
-            <option>Content</option>
-            <option>Video</option>
-            <option>Other</option>
-          </select>
+          <select id="r-type"><option value="">Select</option><option>Pictures</option><option>Content</option><option>Video</option><option>Other</option></select>
         </div>
         <div class="form-group"><label>Due Date</label><input type="date" id="r-due"/></div>
         <div class="form-group full"><label>Description *</label><textarea id="r-desc" placeholder="Kya chahiye detail mein..."></textarea></div>
@@ -111,179 +96,33 @@
 
 </div>
 
+<!-- TASK DETAIL MODAL -->
+<div class="modal-overlay" id="taskModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="modal-title">Task</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
 <!-- UPLOAD MODAL -->
 <div class="modal-overlay" id="uploadModal">
   <div class="modal">
-    <div class="modal-head"><h3 id="modal-title">Upload Deliverable</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
-    <div id="modal-body"></div>
+    <div class="modal-head"><h3 id="up-title">Upload</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="form-group" style="margin-bottom:6px"><label>File chuno (max 20MB)</label><input type="file" id="up-file"/></div>
+    <div class="upload-or">— ya —</div>
+    <div class="form-group" style="margin-bottom:12px"><label>Drive / File Link (badi video ke liye)</label><input type="url" id="up-link" placeholder="https://drive.google.com/..."/></div>
+    <div class="form-group"><label>Description *</label><input type="text" id="up-desc" maxlength="300" placeholder="e.g. Instagram Post Draft 1"/></div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="up-btn">Upload</button>
+    </div>
+    <div class="deliverables-list"><h4>Is task ke uploads</h4><div id="up-prev"></div></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script src="script.js"></script>
-<script>
-  let allTasks = [];
-  let user = null;
-
-  window.onload = () => {
-    user = getUser();
-    if (!user || user.role !== 'agency') return window.location.href = 'index.html';
-    initUserChip(user);
-    loadTasks();
-  };
-
-  async function loadTasks() {
-    try {
-      const data = await api({ action:'getTasks', role:'agency', userName:user.name });
-      if (data.success) {
-        allTasks = data.tasks;
-        document.getElementById('s-active').textContent  = allTasks.filter(t=>t.Status==='In Progress').length;
-        document.getElementById('s-pending').textContent = allTasks.filter(t=>t.Status==='Created'||t.Status==='Assigned').length;
-        document.getElementById('s-done').textContent    = allTasks.filter(t=>t.Status==='Approved').length;
-        renderTaskCards(allTasks);
-      }
-    } catch(e) { showToast('Error loading tasks'); }
-  }
-
-  function renderTaskCards(tasks) {
-    const grid = document.getElementById('tasks-grid');
-    grid.innerHTML = !tasks.length
-      ? '<div class="empty-state"><p>Koi task assign nahi hua</p></div>'
-      : tasks.map(t=>`
-        <div class="task-card priority-${t.Priority||'Low'}">
-          <div class="task-card-head"><h3>${t.Title}</h3>${badgeHtml(t.Status)}</div>
-          <p class="task-desc">${t.Description||'Koi description nahi'}</p>
-          <div class="task-meta">
-            <div class="task-meta-item">Type: <strong>${t.Type||'—'}</strong></div>
-            <div class="task-meta-item">Due: <strong style="color:${isDue(t.Due_Date)?'#c62828':'#555'}">${formatDate(t.Due_Date)}</strong></div>
-          </div>
-          <div class="task-actions">
-            ${(t.Status==='In Progress'||t.Status==='Assigned'||t.Status==='Created')?`<button class="btn-sm btn-upload" onclick="openUpload('${t.Task_ID}','${t.Title}',false)">📁 Upload Work</button>`:''}
-            ${(t.Status==='Created'||t.Status==='Assigned')?`<button class="btn-sm btn-progress" onclick="markProgress('${t.Task_ID}')">▶ Start</button>`:''}
-            ${t.Status==='In Progress'?`<button class="btn-sm btn-done" onclick="openUpload('${t.Task_ID}','${t.Title}',true)">✓ Mark Done</button>`:''}
-            ${t.Status==='Rejected'?`<button class="btn-sm btn-upload" onclick="openUpload('${t.Task_ID}','${t.Title}',false)">🔄 Resubmit</button>`:''}
-          </div>
-        </div>`).join('');
-  }
-
-  async function markProgress(taskId) {
-    try {
-      await api({ action:'updateStatus', taskId, newStatus:'In Progress', userName:user.name, userRole:'agency', remarks:'Agency ne kaam shuru kiya' });
-      showToast('✅ Task started!'); loadTasks();
-    } catch(e) { showToast('Error'); }
-  }
-
-  async function openUpload(taskId, title, submitAfter) {
-    let dels = [];
-    try { const d = await api({ action:'getDeliverables', taskId }); if(d.success) dels = d.deliverables; } catch(e) {}
-    document.getElementById('modal-title').textContent = `Upload — ${title}`;
-    document.getElementById('modal-body').innerHTML = `
-      <div class="form-group"><label>Drive / File Link *</label><input type="url" id="up-link" placeholder="https://drive.google.com/..."/></div>
-      <div class="form-group"><label>Description *</label><input type="text" id="up-desc" placeholder="Kya upload kiya — e.g. Instagram Post Draft 1"/></div>
-      <button class="btn-primary" onclick="doUpload('${taskId}','${title}',${submitAfter})">${submitAfter ? 'Submit & Mark Done' : 'Upload'}</button>
-      ${dels.length ? `<div class="deliverables-list"><h4>Previous Uploads</h4>${dels.map(d=>`<div class="del-item"><a href="${d.File_Link}" target="_blank" style="color:#4a148c">🔗 ${d.Description||'File'}</a><div class="del-meta">${formatDate(d.Upload_Date)} · <strong>${d.Status}</strong></div></div>`).join('')}</div>` : ''}
-    `;
-    openModal('uploadModal');
-  }
-
-  async function doUpload(taskId, title, submitAfter) {
-    const link = document.getElementById('up-link').value.trim();
-    const desc = document.getElementById('up-desc').value.trim();
-    if (!link || !desc) { showToast('Link aur description daalo!'); return; }
-    try {
-      await api({ action:'addDeliverable', taskId, taskTitle:title, fileLink:link, description:desc, uploadedBy:user.name });
-      if (submitAfter) {
-        await api({ action:'updateStatus', taskId, newStatus:'Review', userName:user.name, userRole:'agency', remarks:'Agency ne kaam complete kiya' });
-        showToast('✅ Submitted for review!');
-      } else {
-        showToast('✅ Uploaded!');
-      }
-      closeModal(); loadTasks();
-    } catch(e) { showToast('Error'); }
-  }
-
-  async function loadDeliverables() {
-    try {
-      const data = await api({ action:'getDeliverables' });
-      const tbody = document.getElementById('del-tbody');
-      if (data.success && data.deliverables.length) {
-        const mine = data.deliverables.filter(d=>d.Uploaded_By===user.name);
-        tbody.innerHTML = !mine.length
-          ? '<tr><td colspan="5" class="empty-state"><p>Abhi koi upload nahi</p></td></tr>'
-          : mine.map(d=>`<tr>
-              <td><strong>${d.Task_Title||'—'}</strong></td>
-              <td>${d.Description||'—'}</td>
-              <td><a href="${d.File_Link}" target="_blank" style="color:#4a148c;font-weight:500">🔗 Open</a></td>
-              <td style="font-size:12px;color:#888">${formatDate(d.Upload_Date)}</td>
-              <td>${badgeHtml(d.Status)}</td>
-            </tr>`).join('');
-      } else {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Koi deliverable nahi</p></td></tr>';
-      }
-    } catch(e) { showToast('Error'); }
-  }
-
-  async function loadMyRequests() {
-    try {
-      const data = await api({ action:'getAgencyRequests' });
-      const tbody = document.getElementById('req-tbody');
-      if (data.success && data.requests.length) {
-        const mine = data.requests.filter(r => r.Created_By === user.name);
-        tbody.innerHTML = !mine.length
-          ? '<tr><td colspan="6" class="empty-state"><p>Koi request nahi</p></td></tr>'
-          : mine.map(r=>`<tr>
-              <td><strong>${r.Title||'—'}</strong><br><small style="color:#aaa">${r.Description||''}</small></td>
-              <td>${r.Type||'—'}</td>
-              <td>${formatDate(r.Due_Date)}</td>
-              <td style="font-size:12px;color:#888">${r.Remarks||'—'}</td>
-              <td><span class="badge badge-${(r.Status||'pending').toLowerCase()}">${r.Status||'Pending'}</span></td>
-              <td style="font-size:12px;color:#aaa">${formatDate(r.Created_At)}</td>
-            </tr>`).join('');
-      } else {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><p>Koi request nahi</p></td></tr>';
-      }
-    } catch(e) { showToast('Error loading requests'); }
-  }
-
-  async function submitRequest() {
-    const title   = document.getElementById('r-title').value.trim();
-    const type    = document.getElementById('r-type').value;
-    const due     = document.getElementById('r-due').value;
-    const desc    = document.getElementById('r-desc').value.trim();
-    const remarks = document.getElementById('r-remarks').value.trim();
-    if (!title || !type || !desc) { showToast('Title, Type aur Description required!'); return; }
-    const btn = document.getElementById('reqBtn');
-    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Sending...';
-    try {
-      const data = await api({ 
-        action:'createAgencyRequest', 
-        title, 
-        type, 
-        dueDate: due, 
-        description: desc, 
-        remarks, 
-        createdBy: user.name 
-      });
-      console.log('Response:', data);
-      if (data.success) {
-        showToast('✅ Request sent!');
-        document.getElementById('r-title').value = '';
-        document.getElementById('r-type').value = '';
-        document.getElementById('r-due').value = '';
-        document.getElementById('r-desc').value = '';
-        document.getElementById('r-remarks').value = '';
-        showSection('requests'); 
-        loadMyRequests();
-      } else {
-        showToast('Error: ' + (data.message || 'Unknown error'));
-      }
-    } catch(e) { 
-      console.error(e);
-      showToast('Network error'); 
-    }
-    btn.disabled = false; btn.innerHTML = '📨 Send Request';
-  }
-</script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script src="agency.js"></script>
 </body>
 </html>
