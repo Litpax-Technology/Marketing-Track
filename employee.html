@@ -12,7 +12,7 @@
   <div class="sidebar-brand"><h2>⚡ Litpax</h2><p>Employee Panel</p></div>
   <nav class="nav">
     <div class="nav-item active" onclick="showSection('todo')" id="nav-todo"><span class="icon">✅</span> To-Do <span class="nav-count alert" id="c-todo"></span></div>
-    <div class="nav-item" onclick="showSection('agency')" id="nav-agency"><span class="icon">🏢</span> Agency ke paas <span class="nav-count" id="c-agency"></span></div>
+    <div class="nav-item" onclick="showSection('agency')" id="nav-agency"><span class="icon">🏢</span> With Agency <span class="nav-count" id="c-agency"></span></div>
     <div class="nav-item" onclick="showSection('review')" id="nav-review"><span class="icon">🔍</span> Owner review <span class="nav-count" id="c-review"></span></div>
     <div class="nav-item" onclick="showSection('done')" id="nav-done"><span class="icon">📦</span> Completed</div>
     <div class="nav-item" onclick="showSection('assign');prepAssign()" id="nav-assign"><span class="icon">➕</span> Assign to Agency</div>
@@ -33,18 +33,18 @@
   <!-- TO-DO -->
   <div class="section active" id="section-todo">
     <div class="page-header">
-      <div><h1>To-Do</h1><p>Sirf jo kaam abhi aapke paas hai. Tick karo, list se hat jaayega.</p></div>
+      <div><h1>To-Do</h1><p>Only what's on your plate right now. Tick a task to clear it.</p></div>
       <button class="btn-primary" onclick="loadTasks()">🔄 Refresh</button>
     </div>
     <div class="stats-grid">
-      <div class="stat-card amber"><div class="stat-label">Mera Kaam</div><div class="stat-value" id="s-todo">—</div><div class="stat-sub">Pending</div></div>
-      <div class="stat-card"><div class="stat-label">Agency ke paas</div><div class="stat-value" id="s-agency">—</div><div class="stat-sub">Agency kaam kar rahi hai</div></div>
-      <div class="stat-card"><div class="stat-label">Owner review</div><div class="stat-value" id="s-review">—</div><div class="stat-sub">Approval ka wait</div></div>
-      <div class="stat-card red"><div class="stat-label">Overdue</div><div class="stat-value" id="s-overdue">—</div><div class="stat-sub">Due date nikal gayi</div></div>
+      <div class="stat-card amber"><div class="stat-label">My Tasks</div><div class="stat-value" id="s-todo">—</div><div class="stat-sub">Pending</div></div>
+      <div class="stat-card"><div class="stat-label">With Agency</div><div class="stat-value" id="s-agency">—</div><div class="stat-sub">Agency is working</div></div>
+      <div class="stat-card"><div class="stat-label">Owner review</div><div class="stat-value" id="s-review">—</div><div class="stat-sub">Awaiting approval</div></div>
+      <div class="stat-card red"><div class="stat-label">Overdue</div><div class="stat-value" id="s-overdue">—</div><div class="stat-sub">Past due date</div></div>
     </div>
     <div id="alerts"></div>
     <div class="table-card">
-      <div class="table-header"><h3>Mera Kaam</h3></div>
+      <div class="table-header"><h3>My Tasks</h3></div>
       <table><thead><tr><th class="td-check"></th><th>Task</th><th>Type</th><th>For</th><th>Priority</th><th>Due</th><th>Action</th></tr></thead>
       <tbody id="todo-tbody"><tr><td colspan="7" class="empty-state"><p>Loading...</p></td></tr></tbody></table>
     </div>
@@ -53,7 +53,7 @@
   <!-- AGENCY KE PAAS -->
   <div class="section" id="section-agency">
     <div class="page-header">
-      <div><h1>Agency ke paas</h1><p>Agency kaam kar rahi hai, ya reject hoke rework mein hai</p></div>
+      <div><h1>With Agency</h1><p>Agency is working on these, or they're back for rework</p></div>
       <button class="btn-primary" onclick="loadTasks()">🔄 Refresh</button>
     </div>
     <div class="table-card">
@@ -65,11 +65,11 @@
   <!-- OWNER REVIEW -->
   <div class="section" id="section-review">
     <div class="page-header">
-      <div><h1>Owner review mein</h1><p>Owner ke approve/reject ka wait</p></div>
+      <div><h1>In Owner Review</h1><p>Waiting for owner approval</p></div>
       <button class="btn-primary" onclick="loadTasks()">🔄 Refresh</button>
     </div>
     <div class="table-card">
-      <table><thead><tr><th>Task</th><th>For</th><th>Agency</th><th>Bheja</th><th>Due</th><th>Action</th></tr></thead>
+      <table><thead><tr><th>Task</th><th>For</th><th>Agency</th><th>Sent</th><th>Due</th><th>Action</th></tr></thead>
       <tbody id="review-tbody"></tbody></table>
     </div>
   </div>
@@ -77,7 +77,7 @@
   <!-- COMPLETED -->
   <div class="section" id="section-done">
     <div class="page-header">
-      <div><h1>Completed</h1><p>Poora record — kab aur kisne complete kiya</p></div>
+      <div><h1>Completed</h1><p>Full record — who completed what, and when</p></div>
       <button class="btn-primary" onclick="loadTasks()">🔄 Refresh</button>
     </div>
     <div class="table-card">
@@ -89,18 +89,18 @@
           <button class="filter-btn" onclick="setActiveBtn(this);doneFilter='Cancelled';renderDone()">Cancelled</button>
         </div>
       </div>
-      <table><thead><tr><th>Task</th><th>For</th><th>Status</th><th>Complete hua</th><th>Kisne</th><th>Action</th></tr></thead>
+      <table><thead><tr><th>Task</th><th>For</th><th>Status</th><th>Completed on</th><th>By</th><th>Action</th></tr></thead>
       <tbody id="done-tbody"></tbody></table>
     </div>
   </div>
 
   <!-- ASSIGN TO AGENCY -->
   <div class="section" id="section-assign">
-    <div class="page-header"><div><h1>Assign to Agency</h1><p>Apni taraf se agency ko kaam do</p></div></div>
+    <div class="page-header"><div><h1>Assign to Agency</h1><p>Assign work to the agency directly</p></div></div>
     <div class="form-card">
-      <h3>➕ Naya Task Agency ko</h3>
+      <h3>➕ New Task for Agency</h3>
       <div class="form-grid">
-        <div class="form-group full"><label>Task Title *</label><input type="text" id="a-title" maxlength="200" placeholder="e.g. Facebook Ad copy likhni hai"/></div>
+        <div class="form-group full"><label>Task Title *</label><input type="text" id="a-title" maxlength="200" placeholder="e.g. Write Facebook ad copy"/></div>
         <div class="form-group">
           <label>Type *</label>
           <select id="a-type">
@@ -113,7 +113,7 @@
           <label>Priority *</label>
           <select id="a-priority"><option value="">Select</option><option>High</option><option>Medium</option><option>Low</option></select>
         </div>
-        <div class="form-group full"><label>Description</label><textarea id="a-desc" placeholder="Kya karna hai detail mein..."></textarea></div>
+        <div class="form-group full"><label>Description</label><textarea id="a-desc" placeholder="Describe the task in detail..."></textarea></div>
         <div class="form-group"><label>Agency *</label><select id="a-agency"><option value="">Loading...</option></select></div>
         <div class="form-group"><label>Due Date</label><input type="date" id="a-due"/></div>
       </div>
@@ -125,11 +125,11 @@
   <!-- AGENCY REQUESTS -->
   <div class="section" id="section-requests">
     <div class="page-header">
-      <div><h1>Agency Requests</h1><p>Marketing agency ko kya chahiye</p></div>
+      <div><h1>Agency Requests</h1><p>What the marketing agency needs</p></div>
       <button class="btn-primary" onclick="loadAgencyRequests()">🔄 Refresh</button>
     </div>
     <div class="stats-grid col3">
-      <div class="stat-card amber"><div class="stat-label">Pending</div><div class="stat-value" id="ar-pending">—</div><div class="stat-sub">Kaam karna hai</div></div>
+      <div class="stat-card amber"><div class="stat-label">Pending</div><div class="stat-value" id="ar-pending">—</div><div class="stat-sub">To do</div></div>
       <div class="stat-card green"><div class="stat-label">Done</div><div class="stat-value" id="ar-done">—</div><div class="stat-sub">Complete</div></div>
       <div class="stat-card red"><div class="stat-label">Rejected</div><div class="stat-value" id="ar-rejected">—</div><div class="stat-sub">Rejected</div></div>
     </div>
@@ -139,7 +139,7 @@
   <!-- ACTIVITY LOG -->
   <div class="section" id="section-log">
     <div class="page-header">
-      <div><h1>Activity Log</h1><p>Saari activities</p></div>
+      <div><h1>Activity Log</h1><p>All activity</p></div>
       <button class="btn-primary" onclick="loadLog()">🔄 Refresh</button>
     </div>
     <div class="table-card">
