@@ -30,7 +30,7 @@ async function api(body) {
   const data = await res.json();
   if (data.auth === false) {
     sessionStorage.clear();
-    alert(data.message || 'Session expire. Dobara login karo.');
+    alert(data.message || 'Session expired. Please log in again.');
     window.location.href = 'index.html';
     throw new Error('auth');
   }
@@ -95,7 +95,7 @@ function dueHtml(t) {
   const st = dueState(t);
   const label = formatDate(t.Due_Date);
   if (st === 'overdue') return `<span class="due-overdue">${label}</span>`;
-  if (st === 'today')   return `<span class="due-today">Aaj</span>`;
+  if (st === 'today')   return `<span class="due-today">Today</span>`;
   return label;
 }
 
@@ -162,7 +162,7 @@ function renderAlerts(el, tasks, onClickFn) {
       <span class="meta">${badgeHtml(t.Status)} · ${formatDate(t.Due_Date)}</span></div>`;
   el.innerHTML =
     (overdue.length ? `<div class="alert-box"><h4>⚠️ Overdue (${overdue.length})</h4>${overdue.map(item).join('')}</div>` : '') +
-    (today.length ? `<div class="alert-box today"><h4>📅 Aaj due (${today.length})</h4>${today.map(item).join('')}</div>` : '');
+    (today.length ? `<div class="alert-box today"><h4>📅 Due today (${today.length})</h4>${today.map(item).join('')}</div>` : '');
 }
 
 // ── UI: SECTIONS / TABS ────────────────────────────────
@@ -259,7 +259,7 @@ async function fillAgencySelect(selectEl, selected) {
     try { const d = await api({ action: 'getAgencies' }); agencyCache = d.success ? d.agencies : []; }
     catch (e) { agencyCache = []; }
   }
-  selectEl.innerHTML = '<option value="">Agency select karo</option>' +
+  selectEl.innerHTML = '<option value="">Select agency</option>' +
     agencyCache.map(a => `<option ${a === selected ? 'selected' : ''}>${esc(a)}</option>`).join('');
 }
 
@@ -302,7 +302,7 @@ async function openTaskModal(task, actionsHtml) {
     <div class="comments"><h4>💬 Comments</h4>
       <div id="m-cmts"><p class="muted">Loading...</p></div>
       <div class="comment-form">
-        <input class="remarks-input" id="m-cmt-text" placeholder="Comment likho..." maxlength="1000"/>
+        <input class="remarks-input" id="m-cmt-text" placeholder="Write a comment..." maxlength="1000"/>
         <button class="btn-sm btn-view" onclick="postComment('${esc(task.Task_ID)}')">Send</button>
       </div>
     </div>
@@ -325,8 +325,8 @@ async function loadModalDeliverables(taskId) {
         <a href="${safeUrl(x.File_Link)}" target="_blank" rel="noopener">🔗 ${esc(x.Description || 'File')}</a>
         <div class="del-meta">${esc(x.Uploaded_By)} · ${formatDateTime(x.Upload_Date)} · ${badgeHtml(x.Status)}
           ${x.Owner_Remarks ? ' · ' + esc(x.Owner_Remarks) : ''}</div>
-      </div>`).join('') : '<p class="muted">Koi deliverable nahi</p>';
-  } catch (e) { el.innerHTML = '<p class="muted">Load nahi hua</p>'; }
+      </div>`).join('') : '<p class="muted">No deliverables yet</p>';
+  } catch (e) { el.innerHTML = '<p class="muted">Could not load</p>'; }
 }
 
 async function loadComments(taskId) {
@@ -340,9 +340,9 @@ async function loadComments(taskId) {
         <div class="cmt-head"><strong>${esc(c.User_Name)}</strong> ${badgeHtml(c.User_Role)}
           <span class="cmt-time">${formatDateTime(c.Timestamp)}</span></div>
         <div class="pre-wrap">${esc(c.Comment)}</div>
-      </div>`).join('') : '<p class="muted">Abhi koi comment nahi</p>';
+      </div>`).join('') : '<p class="muted">No comments yet</p>';
     el.scrollTop = el.scrollHeight;
-  } catch (e) { el.innerHTML = '<p class="muted">Load nahi hua</p>'; }
+  } catch (e) { el.innerHTML = '<p class="muted">Could not load</p>'; }
 }
 
 async function postComment(taskId) {
@@ -370,8 +370,8 @@ async function loadLog() {
         <td>${esc(l.Action)}</td>
         <td class="small muted">${esc(l.Task_Title || '—')}</td>
         <td class="small muted">${esc(l.Remarks || '—')}</td>
-      </tr>`).join('') : emptyRow(6, 'Koi activity nahi');
-  } catch (e) { tbody.innerHTML = emptyRow(6, 'Load nahi hua'); }
+      </tr>`).join('') : emptyRow(6, 'No activity yet');
+  } catch (e) { tbody.innerHTML = emptyRow(6, 'Could not load'); }
 }
 
 // ── USER CHIP ──────────────────────────────────────────
