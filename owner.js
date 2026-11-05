@@ -33,7 +33,7 @@ async function loadDashboard() {
     setCount('c-review', s.review);
 
     const types = Object.keys(d.byType).sort((a, b) => d.byType[b].total - d.byType[a].total);
-    document.getElementById('type-tbody').innerHTML = !types.length ? emptyRow(4, 'Koi data nahi') :
+    document.getElementById('type-tbody').innerHTML = !types.length ? emptyRow(4, 'No data yet') :
       types.map(k => {
         const x = d.byType[k];
         return `<tr><td><strong>${esc(k)}</strong></td><td>${x.total}</td><td>${x.done}</td>
@@ -60,7 +60,7 @@ async function loadTasks() {
 
 function renderReviewQueue() {
   const review = sortByDue(allTasks.filter(t => t.Status === 'Review'));
-  document.getElementById('review-tbody').innerHTML = !review.length ? emptyRow(7, 'Koi review pending nahi ✅') :
+  document.getElementById('review-tbody').innerHTML = !review.length ? emptyRow(7, 'No reviews pending ✅') :
     review.map(t => {
       const id = esc(t.Task_ID);
       return `<tr>
@@ -70,7 +70,7 @@ function renderReviewQueue() {
         <td>${esc(t.Agency_Person || '—')}</td>
         <td class="small muted">${formatDate(t.Last_Updated)}</td>
         <td>${dueHtml(t)}</td>
-        <td><button class="action-btn btn-view" onclick="viewTask('${id}')">Dekho & Approve</button></td>
+        <td><button class="action-btn btn-view" onclick="viewTask('${id}')">Review</button></td>
       </tr>`;
     }).join('');
 }
@@ -83,7 +83,7 @@ function renderTasks() {
   tasks = tFilter.bucket === 'done' ? sortByCompleted(tasks) : sortByDue(tasks);
 
   const tbody = document.getElementById('tasks-tbody');
-  if (!tasks.length) { tbody.innerHTML = emptyRow(9, 'Koi task nahi'); return; }
+  if (!tasks.length) { tbody.innerHTML = emptyRow(9, 'No tasks'); return; }
   tbody.innerHTML = tasks.map(t => {
     const id = esc(t.Task_ID);
     const canTick = !isAgencyTask(t) && !FINAL.includes(t.Status);
@@ -110,12 +110,12 @@ async function tickTask(taskId, chk) {
   chk.disabled = true;
   row && row.classList.add('row-done');
   if (await taskOp(taskId, 'complete')) {
-    afterChange('✅ Task complete', { undo: () => reopenTask(taskId) });
+    afterChange('✅ Task completed', { undo: () => reopenTask(taskId) });
   } else { chk.checked = false; chk.disabled = false; row && row.classList.remove('row-done'); }
 }
 
 async function reopenTask(taskId) {
-  if (await taskOp(taskId, 'reopen')) afterChange('↺ Wapas To-Do mein');
+  if (await taskOp(taskId, 'reopen')) afterChange('↺ Moved back to To-Do');
 }
 
 async function approveTask(taskId) {
@@ -126,24 +126,24 @@ async function approveTask(taskId) {
 async function rejectTask(taskId) {
   const el = document.getElementById('m-remarks');
   const reason = el ? el.value.trim() : '';
-  if (!reason) { el && el.classList.add('input-error'); return showToast('Reject ka reason likho — agency ko dikhega'); }
-  if (await taskOp(taskId, 'reject', { reason })) afterChange('Task reject hua — rework mein gaya');
+  if (!reason) { el && el.classList.add('input-error'); return showToast('Please add a rejection reason — the agency will see it'); }
+  if (await taskOp(taskId, 'reject', { reason })) afterChange('Task rejected — sent back for rework');
 }
 
 async function forwardTask(taskId) {
   const agencyPerson = document.getElementById('m-agency').value;
-  if (!agencyPerson) return showToast('Agency select karo!');
-  if (await taskOp(taskId, 'forward', { agencyPerson })) afterChange('✅ Agency ko forward ho gaya');
+  if (!agencyPerson) return showToast('Please select an agency.');
+  if (await taskOp(taskId, 'forward', { agencyPerson })) afterChange('✅ Forwarded to agency');
 }
 
 async function completeTask(taskId) {
-  if (await taskOp(taskId, 'complete')) afterChange('✅ Task complete', { undo: () => reopenTask(taskId) });
+  if (await taskOp(taskId, 'complete')) afterChange('✅ Task completed', { undo: () => reopenTask(taskId) });
 }
 
 async function cancelTask(taskId) {
-  const reason = await askReason('Task cancel karo', 'Reason likho (zaroori)', true);
+  const reason = await askReason('Cancel task', 'Reason (required)', true);
   if (reason === null) return;
-  if (await taskOp(taskId, 'cancel', { reason })) afterChange('Task cancel ho gaya');
+  if (await taskOp(taskId, 'cancel', { reason })) afterChange('Task cancelled');
 }
 
 function viewTask(taskId) {
@@ -152,21 +152,21 @@ function viewTask(taskId) {
   const id = esc(taskId);
   let actions = '';
   if (t.Status === 'Review') {
-    actions = `<input class="remarks-input" id="m-remarks" placeholder="Remarks — reject pe zaroori (agency ko dikhega)"/>
+    actions = `<input class="remarks-input" id="m-remarks" placeholder="Remarks — required to reject (visible to agency)"/>
       <div class="action-row">
         <button class="btn-primary" style="background:#2e7d32" onclick="approveTask('${id}')">✓ Approve</button>
         <button class="btn-primary" style="background:#c62828" onclick="rejectTask('${id}')">✗ Reject</button>
       </div>`;
   } else if (isAgencyTask(t) && t.Status === 'Created') {
     actions = `<div class="action-row"><select id="m-agency"></select>
-      <button class="btn-primary" onclick="forwardTask('${id}')">→ Agency ko forward</button></div>`;
+      <button class="btn-primary" onclick="forwardTask('${id}')">→ Forward to agency</button></div>`;
   } else if (!isAgencyTask(t) && !FINAL.includes(t.Status)) {
     actions = `<button class="btn-primary" onclick="completeTask('${id}')">✓ Complete</button>`;
   } else if (!isAgencyTask(t) && t.Status === 'Approved') {
     actions = `<button class="btn-ghost" onclick="reopenTask('${id}')">↺ Reopen</button>`;
   }
   if (!FINAL.includes(t.Status)) {
-    actions += `<br><button class="btn-danger-text" onclick="cancelTask('${id}')">Task cancel karo</button>`;
+    actions += `<br><button class="btn-danger-text" onclick="cancelTask('${id}')">Cancel task</button>`;
   }
   openTaskModal(t, actions).then(() => {
     const sel = document.getElementById('m-agency');
@@ -191,7 +191,7 @@ async function createTask() {
   const description = document.getElementById('f-desc').value.trim();
   const dueDate = document.getElementById('f-due').value;
   const agencyPerson = taskFor === TASK_FOR_AGENCY ? document.getElementById('f-agency').value : '';
-  if (!title || !type || !priority) return showToast('Title, Type aur Priority required!');
+  if (!title || !type || !priority) return showToast('Title, Type and Priority are required.');
   const btn = document.getElementById('createBtn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Creating...';
   try {
@@ -216,7 +216,7 @@ async function loadAgencyRequests() {
     document.getElementById('ar-done').textContent     = reqs.filter(r => r.Status === 'Done').length;
     document.getElementById('ar-rejected').textContent = reqs.filter(r => r.Status === 'Rejected').length;
     document.getElementById('requests-grid').innerHTML = !reqs.length
-      ? '<div class="empty-state"><p>Koi request nahi</p></div>'
+      ? '<div class="empty-state"><p>No requests</p></div>'
       : reqs.map(r => `<div class="req-card status-${esc((r.Status || 'pending').toLowerCase())}">
           <div class="req-card-head"><h3>${esc(r.Title)}</h3>${badgeHtml(r.Status || 'Pending')}</div>
           <p class="pre-wrap" style="color:#555;margin-bottom:8px">${esc(r.Description || '—')}</p>
@@ -224,7 +224,7 @@ async function loadAgencyRequests() {
             <div class="req-meta-item">Type: <strong>${esc(r.Type || '—')}</strong></div>
             <div class="req-meta-item">Due: <strong>${formatDate(r.Due_Date)}</strong></div>
             <div class="req-meta-item">From: <strong>${esc(r.Created_By || '—')}</strong></div>
-            <div class="req-meta-item">Bheja: <strong>${formatDate(r.Created_At)}</strong></div>
+            <div class="req-meta-item">Sent: <strong>${formatDate(r.Created_At)}</strong></div>
             ${r.Remarks ? `<div class="req-meta-item">Remarks: <strong>${esc(r.Remarks)}</strong></div>` : ''}
           </div>
         </div>`).join('');
